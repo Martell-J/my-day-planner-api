@@ -14,7 +14,7 @@ This api will feature:
 
 After pulling a copy of the repository
 
--- Ensure you have a copy of yarn --
+-- Ensure you have yarn installed (1.3.2 or Later) --
 
 'yarn install' - Initialize lockfile, and garner dependencies
 
