@@ -4,6 +4,10 @@ SuccessResponse:
 ErrorResponse:
   $ref: ./responses/errorresponse.yaml
 
+# MODEL SCHEMAS
+User:
+  $ref: ./schemas/user.yaml
+
 # COMMON
 BodyObject:
   description: default model for body data sent as JSON

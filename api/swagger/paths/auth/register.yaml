@@ -1,0 +1,22 @@
+x-swagger-router-controller: auth
+post:
+  # Must have the API key
+  security:
+    - GlobalSecurity: []
+  description: Register a user in the system
+  operationId: registerUser
+  parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+  responses:
+      "200":
+        description: Success
+        schema:
+          $ref: "#/definitions/SuccessResponse"
+      default:
+        description: Error
+        schema:
+          $ref: "#/definitions/ErrorResponse"

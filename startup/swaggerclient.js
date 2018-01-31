@@ -53,12 +53,13 @@ module.exports = {
         "swaggerSecurityHandlers": {
           "GlobalSecurity": (req, res, callback) => {
 
-            // Do some security checks here on every-request including the handler...
-            // Return the callback with no data when security passes
-            return callback();
+            if (secret.api_key === req.headers.api_key) {
 
-            // Otherwise, just don't!
-            // return callback(new Error("Access Denied!"));
+              return callback();
+
+            }
+
+            return callback(new Error("Access Denied!"));
 
           },
           "Authentication": (req, res, callback) => {

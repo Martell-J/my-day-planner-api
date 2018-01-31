@@ -16,6 +16,8 @@
         description: Error
         schema:
           $ref: "#/definitions/ErrorResponse"
+/register:
+  $ref: ./auth/register.yaml
 
 # EXAMPLE - Authentication
 # /login:

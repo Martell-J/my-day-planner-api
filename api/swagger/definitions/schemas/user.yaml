@@ -1,0 +1,18 @@
+description: object model for a User
+type: object
+properties:
+  username:
+    type: string
+    description: username for user
+  password:
+    type: string
+    description: password for user
+  firstname:
+    type: string
+    description: first name of user
+  lastname:
+    type: string
+    description: last name of user
+  email:
+    type: string
+    description: the email of the user

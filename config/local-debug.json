@@ -23,6 +23,7 @@
     "swagger_ui": {
       "username": "admin",
       "password": "password"
-    }
+    },
+    "api_key": "samplekey123"
   }
 }

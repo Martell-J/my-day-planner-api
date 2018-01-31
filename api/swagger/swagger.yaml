@@ -7,7 +7,6 @@ info:
   $ref: ./info/index.yaml
 # during dev, should point to your local machine
 
-#
 schemes:
   # tip: remove http to make production-grade
   - http
@@ -19,6 +18,15 @@ consumes:
 # format of the responses to the client (Accepts)
 produces:
   - application/json
+
+# Import the security definitions
+securityDefinitions:
+  GlobalSecurity:
+    type: apiKey
+    in: header
+    name: api_key
+security:
+  - GlobalSecurity: []
 
 paths:
   $ref: ./paths/index.yaml
