@@ -18,6 +18,8 @@
           $ref: "#/definitions/ErrorResponse"
 /register:
   $ref: ./auth/register.yaml
+/login:
+  $ref: ./auth/login.yaml
 
 # EXAMPLE - Authentication
 # /login:

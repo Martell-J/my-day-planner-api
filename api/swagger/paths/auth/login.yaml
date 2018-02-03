@@ -1,0 +1,33 @@
+x-swagger-router-controller: auth
+post:
+  # Must have the API key
+  security:
+    - GlobalSecurity: []
+  description: Log a user into the system
+  operationId: loginUser
+  parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            username:
+              type: string
+              description: username for user
+            password:
+              type: string
+              description: password for user
+          required:
+            - username
+            - password
+
+  responses:
+      "200":
+        description: Success
+        schema:
+          $ref: "#/definitions/SuccessResponse"
+      default:
+        description: Error
+        schema:
+          $ref: "#/definitions/ErrorResponse"

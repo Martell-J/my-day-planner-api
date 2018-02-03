@@ -2,7 +2,7 @@
 
 const app = require("express")();
 
-const { connection, env, debug } = require("config");
+const { env, debug } = require("config");
 
 const helmet = require("helmet");
 
@@ -32,8 +32,6 @@ app.env = env;
 app.debug = debug;
 
 process.on("unhandledRejection", (err) => {
-
-  console.log(err)
 
   // Actually throw stack-traces for unhandled rejections (mainly for promise debugging)
   throw err;
