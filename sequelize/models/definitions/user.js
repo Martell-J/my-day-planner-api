@@ -2,7 +2,7 @@
 
 module.exports = (sequelize, dataTypes) => {
 
-  return sequelize.define("baseproduct", {
+  return sequelize.define("user", {
     "userid": {
       "type": dataTypes.INTEGER,
       "primaryKey": true,
