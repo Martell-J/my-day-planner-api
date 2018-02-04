@@ -25,6 +25,7 @@ const endPoints = {
 
     const user = { ...data };
 
+    // Check if the user already exists, match by username
     const getExistingUser = () =>
       models.User.findOne({
         "where": {
@@ -32,6 +33,7 @@ const endPoints = {
         },
       });
 
+    // Garner the password hash via bcrypt & SHA256(default)
     const getHashedPassword = () =>
       new Promise((resolve) =>
 
@@ -43,6 +45,8 @@ const endPoints = {
 
       );
 
+    // Build the user (will fire any instance-validation methods)
+    // If the user passes the build without throwing errors, save the record
     const buildAndSaveUser = (hash) =>
       new Promise((resolve, reject) => {
 
@@ -55,6 +59,11 @@ const endPoints = {
 
       });
 
+    // Chain everything together.
+    // 1. Check if a user exists
+    // 2. Hash the provided password
+    // 3. Build and save the user
+    // 4. Resolve.
     getExistingUser()
       .then((results) => {
 
@@ -83,39 +92,47 @@ const endPoints = {
 
   },
 
+  // Log the user into the system by providing them with a JWT
+  // if the provided data is correct
   "loginUser": (req, res) => {
 
     const { username, password } = req.swagger.params.data.value;
 
-    const tryLogin = () =>
+    // Check if the user exists in the system
+    const checkExistingUser = () =>
       new Promise((resolve, reject) =>
-        models.User.findOne({ "where": { username }})
+        models.User.findOne({ "where": { username } })
           .then((results) => {
 
+            // If the results yield data, return it as a plain-object (get)
             if (results) {
 
               return resolve(results.get());
 
             }
 
+            // Otherwise, throw an error
             return reject(new errors.ServerError("NoUserError", NO_USER, "NO_USER"));
 
           })
           .catch(reject)
       );
 
+    // Compare the hashed password to the hash of the provided password via bcrypt
     const checkPassword = (user) =>
       new Promise((resolve, reject) => {
 
         bcrypt.compare(password, user.password)
           .then((isValid) => {
 
+            // Throw an error if the password is incorrect
             if (!isValid) {
 
               return reject(new errors.ServerError("IncorrectPasswordError", INCORRECT_PASSWORD, "INCORRECT_PASSWORD"));
 
             }
 
+            // Otherwise, pass the user-data up the chain
             return resolve(user);
 
           })
@@ -123,25 +140,34 @@ const endPoints = {
 
       });
 
+    // Sign the JWT for the user, and set it to expire in 1-day. Attach the issue-date
+    // and the userid to the signed object
     const signJWT = (user) =>
       new Promise((resolve, reject) => {
 
         // sign asynchronously
         jwt.sign({ "iat": Math.floor(Date.now() / 1000), "uid": user.userid }, cert, { "expiresIn": 60 * 60 * 24 }, (err, token) => {
 
+          // If there an error signing, pass it up the chain
           if (err) {
 
             return reject(err);
 
           }
 
+          // Otherwise, pass the token up the chain
           return resolve(token);
 
         });
 
       });
 
-    tryLogin()
+    // Tie it all together
+    // 1. Check if the user exists
+    // 2. Check if the password matches
+    // 3. Sign a JWT containing data pertinent to the user and the signing
+    // 4. Return the token
+    checkExistingUser()
       .then(checkPassword)
       .then(signJWT)
       .then((token) => res.send({
@@ -150,8 +176,8 @@ const endPoints = {
       }))
       .catch((err) => {
 
-        console.log(err)
-
+        // Reduce any errors outside of the expected error-types.
+        // Specifically here, we're dealing with sequelizevalidationerrors
         return res.status(400).send(errorReducer(err));
 
       });

@@ -1,5 +1,8 @@
 "use strict";
 
+const cert = require("config").secret.jwt_key;
+const jwt = require("jsonwebtoken");
+
 module.exports = {
 
   "initializeSwaggerClient": (app) => {
@@ -64,11 +67,45 @@ module.exports = {
           },
           "Authentication": (req, res, callback) => {
 
-            // Same deal here.
-            return callback();
+            // Verify the JWT in the header
+            const checkJWT = () =>
+              new Promise((reslv, rejct) => {
 
-            // We can have multiple handlers to pass per-route
+                // Pass the token, and verify it using the cert
+                jwt.verify(req.headers.token, cert, (err, decoded) => {
 
+                  if (err) {
+
+                    return rejct(err);
+
+                  } else if (new Date(decoded.exp) <= Date.now()) {
+
+                    return rejct(new errors.ServerError("TokenExpiredError", "Your issued JWT has expired.", "TOKEN_EXPIRED"));
+
+                  }
+
+                  // Grab the decoded object, and pass it up the chain
+                  return reslv(decoded);
+
+                });
+
+              });
+
+            checkJWT()
+              .then((decoded) => {
+
+                // Set the authorization parameter of the request object to contain
+                // the data acquired via auth
+                req.authorization = decoded;
+
+                return callback();
+
+              })
+              .catch((err) => {
+
+                return callback(err);
+
+              });
 
           },
         },

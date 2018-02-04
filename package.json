@@ -1,7 +1,6 @@
 {
   "name": "swagger-boilerplate-api",
   "version": "0.0.1",
-  "private": true,
   "author": "Johnathan Martell",
   "contributors": [
     {
