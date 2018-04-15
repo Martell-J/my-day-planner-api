@@ -4,50 +4,14 @@
 // Put the test for each models and their relational data here...i guess
 const { models } = require("../../app");
 const { errors, errorReducer } = require("../helpers/errorhelper");
-const cert = require("config").secret.jwt_key;
+const { signJWT } = require("../helpers/auth.js");
+
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 
 // Error Codes
 const EXISTING_USER = "Username already exists in our system.";
 const NO_USER = "Username does not exist in our system.";
 const INCORRECT_PASSWORD = "Password is incorrect.";
-const INVALID_PASSWORD = "Password did not pass validation";
-const INVALID_USERNAME = "Username did not pass validation";
-
-const INVALID_TOKEN = "Token passed was invalid";
-const TOKEN_EXPIRED = "Token has expired.";
-
-const verifyJWT = (token) =>
-  new Promise((resolve, reject) => {
-
-    try {
-
-      jwt.verify(token, cert, (err, decoded) => {
-
-        if (err) {
-
-          return reject(new errors.ServerError("InvalidTokenError", INVALID_TOKEN, "INVALID_TOKEN"));
-
-        }
-
-        if (decoded.exp >= Math.floor(Date.now() / 1000)) {
-
-          return resolve(decoded);
-
-        }
-
-        return reject(new errors.ServerError("TOKEN_EXPIRED", TOKEN_EXPIRED, "TOKEN_EXPIRED"));
-
-      });
-
-    } catch (err) {
-
-      return reject(new errors.ServerError("InvalidTokenError", INVALID_TOKEN, "INVALID_TOKEN"));
-
-    }
-
-  });
 
 const endPoints = {
 
@@ -172,28 +136,6 @@ const endPoints = {
 
       });
 
-    // Sign the JWT for the user, and set it to expire in 1-day. Attach the issue-date
-    // and the userid to the signed object
-    const signJWT = (user) =>
-      new Promise((resolve, reject) => {
-
-        // sign asynchronously
-        jwt.sign({ "iat": Math.floor(Date.now() / 1000), "uid": user.userid }, cert, { "exp": 60 * 60 * 24 }, (err, token) => {
-
-          // If there an error signing, pass it up the chain
-          if (err) {
-
-            return reject(err);
-
-          }
-
-          // Otherwise, pass the token up the chain
-          return resolve(token);
-
-        });
-
-      });
-
     // Tie it all together
     // 1. Check if the user exists
     // 2. Check if the password matches
@@ -222,7 +164,7 @@ const endPoints = {
     // Verify the token,
 
 
-  }
+  },
 
 };
 
