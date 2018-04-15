@@ -1,0 +1,17 @@
+x-swagger-router-controller: auth
+get:
+  # Must have the API key
+  security:
+    - GlobalSecurity: []
+    - Authentication: []
+  description: Retrieves all plans made by the user requesting the resource
+  operationId: getAllPlans
+  responses:
+      "200":
+        description: Success
+        schema:
+          $ref: "#/definitions/SuccessResponse"
+      default:
+        description: Error
+        schema:
+          $ref: "#/definitions/ErrorResponse"
