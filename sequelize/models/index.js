@@ -108,9 +108,31 @@ module.exports = {
 
     };
 
+    const orderAndSync = (models) =>
+      new Promise((resolve, reject) => {
+
+        const sequentiallyIteratePromises = (promiseArray) =>
+          Promise.each(promiseArray, (pf) => pf(), { "concurrency": 1 });
+
+        const modelArray = Object.values(models).sort((mod1, mod2) => mod1.options.syncOrder - mod2.options.syncOrder);
+
+        // Create all tables in syncOrder
+        const modelSyncPromises = modelArray.map((mod) => () => mod.sync());
+
+        // Drop all tables if they already exist
+        const dropAllTablesPromises = modelArray.map((modr) => () => modr.drop()).reverse();
+
+        return sequentiallyIteratePromises(dropAllTablesPromises)
+          .then(() => sequentiallyIteratePromises(modelSyncPromises))
+          .then(() => resolve(models))
+          .catch(reject);
+
+      });
+
     return new Promise((resolve) => {
 
       return getModelDefinitions()
+        .then(orderAndSync)
         .then((models) => {
 
           // If we have all of the models, just tie in the connection model, and the assets object

@@ -2,8 +2,8 @@
 
 module.exports = (sequelize, dataTypes) => {
 
-  return sequelize.define("user", {
-    "userid": {
+  return sequelize.define("User", {
+    "user_id": {
       "type": dataTypes.INTEGER,
       "primaryKey": true,
       "autoIncrement": true,
@@ -23,11 +23,11 @@ module.exports = (sequelize, dataTypes) => {
         },
       },
     },
-    "firstname": {
+    "first_name": {
       "type": dataTypes.STRING,
       "allowNull": false,
     },
-    "lastname": {
+    "last_name": {
       "type": dataTypes.STRING,
       "allowNull": false,
     },
@@ -39,6 +39,8 @@ module.exports = (sequelize, dataTypes) => {
 
     // Define the keyname generated via models index.js
     "keyName": "User",
+
+    "syncOrder": 1,
 
     // Table paramters
     "tableName": "tblusers",
