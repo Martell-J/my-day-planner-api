@@ -7,10 +7,10 @@ properties:
   password:
     type: string
     description: password for user
-  firstname:
+  first_name:
     type: string
     description: first name of user
-  lastname:
+  last_name:
     type: string
     description: last name of user
   email:

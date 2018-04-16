@@ -1,9 +1,9 @@
 "use strict";
-const { ServerError } = require("./errorhelper.js").errors;
+const { InvalidTokenError } = require("./errorhelper.js").errors;
 const cert = require("config").secret.jwt_key;
 const jwt = require("jsonwebtoken");
 
-const INVALID_TOKEN = "Token passed was invalid";
+const NO_TOKEN = "No token provided.";
 const TOKEN_EXPIRED = "Token has expired.";
 
 module.exports = {
@@ -13,8 +13,18 @@ module.exports = {
   "signJWT": (user) =>
     new Promise((resolve, reject) => {
 
+      const DAYS = 1,
+        HOURS = 24,
+        MINUTES = 60,
+        NOW = Math.floor(Date.now() / 1000),
+        SECONDS = 60;
+
       // sign asynchronously
-      jwt.sign({ "iat": Math.floor(Date.now() / 1000), "uid": user.userid }, cert, { "exp": 60 * 60 * 24 }, (err, token) => {
+      jwt.sign({
+        "iat": NOW,
+        "uid": user.userid,
+        "exp": NOW + SECONDS * MINUTES * HOURS * DAYS,
+      }, cert, {}, (err, token) => {
 
         // If there an error signing, pass it up the chain
         if (err) {
@@ -32,11 +42,9 @@ module.exports = {
   "verifyJWT": (token) =>
     new Promise((resolve, reject) => {
 
-      const getInvalidTokenError = () => new ServerError("InvalidTokenError", INVALID_TOKEN, "INVALID_TOKEN");
-
       if (!token || token === "") {
 
-        return reject(getInvalidTokenError());
+        return reject(new InvalidTokenError(NO_TOKEN, "NO_TOKEN"));
 
       }
 
@@ -46,7 +54,7 @@ module.exports = {
 
           if (err) {
 
-            return reject(getInvalidTokenError());
+            return reject(new InvalidTokenError());
 
           }
 
@@ -56,13 +64,13 @@ module.exports = {
 
           }
 
-          return reject(new ServerError("InvalidTokenError", TOKEN_EXPIRED, "TOKEN_EXPIRED"));
+          return reject(new InvalidTokenError(TOKEN_EXPIRED, "TOKEN_EXPIRED"));
 
         });
 
       } catch (err) {
 
-        return reject(new ServerError("InvalidTokenError", INVALID_TOKEN, "INVALID_TOKEN"));
+        return reject(new InvalidTokenError());
 
       }
 

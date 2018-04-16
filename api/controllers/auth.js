@@ -4,6 +4,7 @@
 // Put the test for each models and their relational data here...i guess
 const { models } = require("../../app");
 const { errors, errorReducer } = require("../helpers/errorhelper");
+const { AuthenticationError, ValidationError } = errors;
 const { signJWT } = require("../helpers/auth.js");
 
 const bcrypt = require("bcrypt");
@@ -65,7 +66,7 @@ const endPoints = {
 
         if (results) {
 
-          throw new errors.ServerError("ExistingUserError", EXISTING_USER, "EXISTING_USER");
+          throw new ValidationError(EXISTING_USER, "EXISTING_USER");
 
         }
 
@@ -108,7 +109,7 @@ const endPoints = {
             }
 
             // Otherwise, throw an error
-            return reject(new errors.ServerError("NoUserError", NO_USER, "NO_USER"));
+            return reject(new AuthenticationError(NO_USER, "NO_USER"));
 
           })
           .catch(reject)
@@ -124,7 +125,7 @@ const endPoints = {
             // Throw an error if the password is incorrect
             if (!isValid) {
 
-              return reject(new errors.ServerError("IncorrectPasswordError", INCORRECT_PASSWORD, "INCORRECT_PASSWORD"));
+              return reject(new AuthenticationError(INCORRECT_PASSWORD, "INCORRECT_PASSWORD"));
 
             }
 
@@ -155,14 +156,6 @@ const endPoints = {
         return res.status(400).send(errorReducer(err));
 
       });
-
-  },
-  "verifyUser": (req, res) => {
-
-    const token = req.headers.auth;
-
-    // Verify the token,
-
 
   },
 

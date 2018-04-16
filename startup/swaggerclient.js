@@ -1,9 +1,8 @@
 "use strict";
 
-const cert = require("config").secret.jwt_key;
-const jwt = require("jsonwebtoken");
 const { verifyJWT } = require("../api/helpers/auth.js");
-const { ServerError } = require("../api/helpers/errorhelper.js").errors;
+const { ServerError, InvalidUserAuthorityError, InvalidTokenError } = require("../api/helpers/errorhelper.js").errors;
+const Promise = require("bluebird");
 
 module.exports = {
 
@@ -64,12 +63,12 @@ module.exports = {
 
             }
 
-            return callback(new Error("Access Denied!"));
+            return callback(new InvalidUserAuthorityError());
 
           },
           "Authentication": (req, res, callback) => {
 
-            verifyJWT()
+            verifyJWT(req.headers.authentication)
               .then((decoded) => {
 
                 // Set the authorization parameter of the request object to contain
@@ -79,7 +78,26 @@ module.exports = {
                 return callback();
 
               })
-              .catch(callback);
+              .catch((e) => {
+
+                // Conditional scoping for user-view
+                // * Generify the error if the details aren't pertinent to what a user should be seeing
+                if (e instanceof InvalidTokenError) {
+
+                  app.logger.error(e);
+
+                  return callback(new InvalidUserAuthorityError());
+
+                } else if (e instanceof ServerError) {
+
+                  return callback(e);
+
+                }
+
+                // You could do something more pertinent to server-errors here.
+                return callback(e);
+
+              });
 
           },
         },

@@ -31,16 +31,12 @@ app.env = env;
 
 app.debug = debug;
 
-if (env.includes("debug")) {
+process.on("unhandledRejection", (err) => {
 
-  process.on("unhandledRejection", (err) => {
+  // Actually throw stack-traces for unhandled rejections (mainly for promise debugging)
+  throw err;
 
-    // Actually throw stack-traces for unhandled rejections (mainly for promise debugging)
-    throw err;
-
-  });
-
-}
+});
 
 const Promise = require("bluebird");
 
