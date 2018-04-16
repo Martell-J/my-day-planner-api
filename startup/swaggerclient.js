@@ -2,6 +2,8 @@
 
 const cert = require("config").secret.jwt_key;
 const jwt = require("jsonwebtoken");
+const { verifyJWT } = require("../api/helpers/auth.js");
+const { ServerError } = require("../api/helpers/errorhelper.js").errors;
 
 module.exports = {
 
@@ -67,31 +69,7 @@ module.exports = {
           },
           "Authentication": (req, res, callback) => {
 
-            // Verify the JWT in the header
-            const checkJWT = () =>
-              new Promise((reslv, rejct) => {
-
-                // Pass the token, and verify it using the cert
-                jwt.verify(req.headers.token, cert, (err, decoded) => {
-
-                  if (err) {
-
-                    return rejct(err);
-
-                  } else if (new Date(decoded.exp) <= Date.now()) {
-
-                    return rejct(new errors.ServerError("TokenExpiredError", "Your issued JWT has expired.", "TOKEN_EXPIRED"));
-
-                  }
-
-                  // Grab the decoded object, and pass it up the chain
-                  return reslv(decoded);
-
-                });
-
-              });
-
-            checkJWT()
+            verifyJWT()
               .then((decoded) => {
 
                 // Set the authorization parameter of the request object to contain
@@ -101,11 +79,7 @@ module.exports = {
                 return callback();
 
               })
-              .catch((err) => {
-
-                return callback(err);
-
-              });
+              .catch(callback);
 
           },
         },
@@ -113,14 +87,15 @@ module.exports = {
 
       SwaggerExpress.create(swaggerConfig, (err, swaggerExpress) => {
 
-        if (err) {
-
-          throw err;
-
-        }
-
         // When debugging, log the path, controller, and operation of each request.
         if (app.debug) {
+
+          // Throw the error if we're debugging, and the error is not an expected type
+          if (err && !(err instanceof ServerError)) {
+
+            throw err;
+
+          }
 
           app.use("/", (req, res, next) => {
 
@@ -162,6 +137,12 @@ module.exports = {
 
           if (swmwErr) {
 
+            if (swmwErr instanceof ServerError) {
+
+              return res.status(400).json(swmwErr.toJson());
+
+            }
+
             app.logger.error(swmwErr);
 
             if (swmwErr.hasOwnProperty("errors")) {
@@ -175,10 +156,7 @@ module.exports = {
 
             } else if (!swmwErr.hasOwnProperty("code" && !swmwErr.hasOwnProperty("message"))) {
 
-              return res.status(400).json({
-                "code": "INTERNAL_ERROR",
-                "message": "Internal error occurred, consult an administrator.",
-              });
+              return res.status(400).json(new ServerError().toJson());
 
             }
 

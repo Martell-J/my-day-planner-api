@@ -25,9 +25,12 @@ securityDefinitions:
     type: apiKey
     in: header
     name: api_key
+  Authentication:
+    type: apiKey
+    in: header
+    name: authentication
 security:
   - GlobalSecurity: []
-
 paths:
   $ref: ./paths/index.yaml
 

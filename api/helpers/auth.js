@@ -1,5 +1,5 @@
 "use strict";
-const { ServerError } = require("./errorhelper.js");
+const { ServerError } = require("./errorhelper.js").errors;
 const cert = require("config").secret.jwt_key;
 const jwt = require("jsonwebtoken");
 
@@ -32,13 +32,21 @@ module.exports = {
   "verifyJWT": (token) =>
     new Promise((resolve, reject) => {
 
+      const getInvalidTokenError = () => new ServerError("InvalidTokenError", INVALID_TOKEN, "INVALID_TOKEN");
+
+      if (!token || token === "") {
+
+        return reject(getInvalidTokenError());
+
+      }
+
       try {
 
         jwt.verify(token, cert, (err, decoded) => {
 
           if (err) {
 
-            return reject(new ServerError("InvalidTokenError", INVALID_TOKEN, "INVALID_TOKEN"));
+            return reject(getInvalidTokenError());
 
           }
 
@@ -48,7 +56,7 @@ module.exports = {
 
           }
 
-          return reject(new ServerError("TOKEN_EXPIRED", TOKEN_EXPIRED, "TOKEN_EXPIRED"));
+          return reject(new ServerError("InvalidTokenError", TOKEN_EXPIRED, "TOKEN_EXPIRED"));
 
         });
 

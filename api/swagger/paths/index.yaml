@@ -20,6 +20,8 @@
   $ref: ./auth/register.yaml
 /login:
   $ref: ./auth/login.yaml
+/plans:
+  $ref: ./plan/plans.yaml
 
 # EXAMPLE - Authentication
 # /login:

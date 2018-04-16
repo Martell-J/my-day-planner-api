@@ -11,6 +11,14 @@ class ServerError extends Error {
 
   }
 
+  toJson() {
+
+    const { name, code, message } = this;
+
+    return { name, code, message };
+
+  }
+
 }
 
 const errorReducer = (err) => {
