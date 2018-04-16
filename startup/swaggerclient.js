@@ -108,8 +108,7 @@ module.exports = {
         // When debugging, log the path, controller, and operation of each request.
         if (app.debug) {
 
-          // Throw the error if we're debugging, and the error is not an expected type
-          if (err && !(err instanceof ServerError)) {
+          if (err) {
 
             throw err;
 
@@ -174,7 +173,7 @@ module.exports = {
 
             } else if (!swmwErr.hasOwnProperty("code" && !swmwErr.hasOwnProperty("message"))) {
 
-              return res.status(400).json(new ServerError().toJson());
+              return res.status(400).json(new ServerError({}).toJson());
 
             }
 

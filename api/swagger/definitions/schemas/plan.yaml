@@ -1,0 +1,14 @@
+description: object model for a Plan
+type: object
+properties:
+  plan_start_datetime:
+    type: string
+    format: date-time
+    description: the start datetime of the plan
+  plan_end_datetime:
+    type: string
+    format: date-time
+    description: the end datetime of the plan
+  plan_details:
+    type: string
+    description: The details relative to the plan

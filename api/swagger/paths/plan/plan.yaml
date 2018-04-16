@@ -1,16 +1,20 @@
-x-swagger-router-controller: auth
+x-swagger-router-controller: plan
 post:
   # Must have the API key
   security:
     - GlobalSecurity: []
-  description: Register a user in the system
-  operationId: registerUser
+      Authentication: []
+  description: Add a plan to the system via a user
+  operationId: addPlan
   parameters:
     - name: data
       in: body
-      required: true
       schema:
-        $ref: "#/definitions/User"
+        $ref: "#/definitions/Plan"
+        required:
+          - plan_start_datetime
+          - plan_end_datetime
+          - plan_details
   responses:
       "200":
         description: Success

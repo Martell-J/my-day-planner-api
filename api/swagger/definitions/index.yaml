@@ -7,8 +7,11 @@ ErrorResponse:
 # MODEL SCHEMAS
 User:
   $ref: ./schemas/user.yaml
+# MODEL SCHEMAS
+Plan:
+  $ref: ./schemas/plan.yaml
 
 # COMMON
-BodyObject:
-  description: default model for body data sent as JSON
-  type: object
+#BodyObject:
+#  description: default model for body data sent as JSON
+#  type: object

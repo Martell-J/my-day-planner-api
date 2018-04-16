@@ -153,7 +153,7 @@ const endPoints = {
 
         // Reduce any errors outside of the expected error-types.
         // Specifically here, we're dealing with sequelizevalidationerrors
-        return res.status(400).send(errorReducer(err));
+        return res.status(400).json(errorReducer(err));
 
       });
 

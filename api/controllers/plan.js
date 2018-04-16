@@ -1,6 +1,7 @@
 "use strict";
 
 const { models } = require("../../app");
+const { errorReducer } = require("../helpers/errorhelper.js");
 
 module.exports = {
 
@@ -17,6 +18,20 @@ module.exports = {
 
       });
 
+
+  },
+
+  "addPlan": (req, res) => {
+
+    const data = { ...req.swagger.params.data.value, "user_id": req.authorization.uid };
+
+    models.Plan.create(data)
+      .then((result) => res.json({ ...result.get() }))
+      .catch((err) => {
+
+        return res.status(400).json(errorReducer(err));
+
+      });
 
   },
 
