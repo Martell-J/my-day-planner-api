@@ -1,5 +1,6 @@
 "use strict";
 
+// Sample migration to create tblUsers
 module.exports = {
   "up": (queryInterface, Sequelize) => {
 

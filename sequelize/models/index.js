@@ -122,8 +122,27 @@ module.exports = {
         // Drop all tables if they already exist
         const dropAllTablesPromises = modelArray.map((modr) => () => modr.drop()).reverse();
 
+        const postServerOps = [
+          () => new Promise((reslv) => {
+
+            // Sample data to generate a dummy-user
+            const SALT_ROUNDS = 12;
+            const DEFAULT_PASSWORD = "password1";
+
+            return models.User.create({
+              "username": "johnathan",
+              "email": "sample@fakemail.ca",
+              "first_name": "John",
+              "last_name": "Doe",
+              "password": require("bcrypt").hashSync(DEFAULT_PASSWORD, SALT_ROUNDS),
+            }).then(reslv);
+
+          }),
+        ];
+
         return sequentiallyIteratePromises(dropAllTablesPromises)
           .then(() => sequentiallyIteratePromises(modelSyncPromises))
+          .then(() => sequentiallyIteratePromises(postServerOps))
           .then(() => resolve(models))
           .catch(reject);
 

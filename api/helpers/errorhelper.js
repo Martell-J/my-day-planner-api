@@ -88,10 +88,18 @@ const errorReducer = (err) => {
 
     return new ValidationError(message, code);
 
+  } else if (err instanceof ServerError) {
+
+    return err;
+
   }
 
-  console.log(err)
+  // TODO:
+  // NOSQL Error logger to handle unexpected errors in this reducer, then
+  // reduce the error into a ServerError (generic) for user-output
 
+  // Why not go full error-handling mode and create an intuitive UI to access
+  // these errors from on the front end? (We'll need user types and the like.)
   return err;
 
 };

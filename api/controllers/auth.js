@@ -142,10 +142,10 @@ const endPoints = {
     // 2. Check if the password matches
     // 3. Sign a JWT containing data pertinent to the user and the signing
     // 4. Return the token
-    checkExistingUser()
+    return checkExistingUser()
       .then(checkPassword)
       .then(signJWT)
-      .then((token) => res.send({
+      .then((token) => res.json({
         "message": "You have successfully logged in!",
         token,
       }))
