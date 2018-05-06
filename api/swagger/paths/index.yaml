@@ -24,7 +24,5 @@
   $ref: ./plan/plans.yaml
 /plan:
   $ref: ./plan/plan.yaml
-
-# EXAMPLE - Authentication
-# /login:
-  # $ref: ./auth/login.yaml
+/userbytoken:
+  $ref: ./user/userbytoken.yaml

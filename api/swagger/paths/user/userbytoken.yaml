@@ -1,0 +1,17 @@
+x-swagger-router-controller: user
+get:
+  # Must have the API key
+  security:
+    - GlobalSecurity: []
+      Authentication: []
+  description: Get a user by their authorization data
+  operationId: getUserByAuthorization
+  responses:
+      "200":
+        description: Success
+        schema:
+          $ref: "#/definitions/SuccessResponse"
+      default:
+        description: Error
+        schema:
+          $ref: "#/definitions/ErrorResponse"
