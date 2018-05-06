@@ -7,7 +7,11 @@ module.exports = {
 
   "getAllPlans": (req, res) => {
 
-    models.Plan.findAll()
+    models.Plan.findAll({
+      "where": {
+        "user_id": req.authorization.uid,
+      },
+    })
       .then((results) => res.json({ ...results }))
       .catch((err) => {
 
