@@ -1,8 +1,18 @@
 "use strict";
 
+const bcrypt = require("bcrypt");
+
+const VALID_USER_TYPES = [
+  "superadmin",
+  "admin",
+  "member",
+  "test",
+];
+const SALT_ROUNDS = 12;
+
 module.exports = (sequelize, dataTypes) => {
 
-  return sequelize.define("User", {
+  const userModel = sequelize.define("User", {
     "user_id": {
       "type": dataTypes.INTEGER,
       "primaryKey": true,
@@ -31,9 +41,34 @@ module.exports = (sequelize, dataTypes) => {
       "type": dataTypes.STRING,
       "allowNull": false,
     },
+    "user_type": {
+      "type": dataTypes.STRING,
+      "allowNull": false,
+      "validate": {
+        "isIn": [VALID_USER_TYPES],
+      },
+    },
     "password": {
       "type": dataTypes.STRING,
       "allowNull": false,
+      set(val) {
+
+        // Validation must come BEFORE the set here, so we can't do a custom validator.
+        if (!new RegExp(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{9,20}$/).test(val)) {
+
+          throw new Error("Password must be between 9 and 20 characters inclusive, and include at least 1 number and letter.");
+
+        }
+
+        this.setDataValue("password", bcrypt.hashSync(val, SALT_ROUNDS));
+
+      },
+      get() {
+
+        // Never allow the password hash to return. (handle it within the model)
+        return "";
+
+      },
     },
   }, {
 
@@ -48,6 +83,17 @@ module.exports = (sequelize, dataTypes) => {
 
     // No timestamps
     "timestamps": false,
+
   });
+
+  // Can't use ES6 Arrow Function here as it messes up the way .apply and .call bind 'this'
+  userModel.prototype.isEqualPassword = function isEqualPassword(password) {
+
+    return bcrypt.compare(password, this.getDataValue("password"));
+
+  };
+
+
+  return userModel;
 
 };

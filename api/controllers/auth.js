@@ -20,7 +20,7 @@ const endPoints = {
 
     const data = req.swagger.params.data.value;
 
-    const user = { ...data };
+    const user = { ...data, "user_type": "member" };
 
     // Check if the user already exists, match by username
     const getExistingUser = () =>
@@ -30,37 +30,20 @@ const endPoints = {
         },
       });
 
-    // Garner the password hash via bcrypt & SHA256(default)
-    const getHashedPassword = () =>
-      new Promise((resolve) =>
-
-        bcrypt.hash(data.password, 10).then((hash) => {
-
-          return resolve(hash);
-
-        })
-
-      );
-
     // Build the user (will fire any instance-validation methods)
     // If the user passes the build without throwing errors, save the record
-    const buildAndSaveUser = (hash) =>
-      new Promise((resolve, reject) => {
-
-        user.password = hash;
-
+    const buildAndSaveUser = () =>
+      new Promise((resolve, reject) =>
         models.User.build(user)
           .save()
           .then(resolve)
-          .catch((err) => reject(err));
-
-      });
+          .catch((err) => reject(err))
+      );
 
     // Chain everything together.
     // 1. Check if a user exists
-    // 2. Hash the provided password
-    // 3. Build and save the user
-    // 4. Resolve.
+    // 2. Build and save the user (Hash checking occurrs on the model)
+    // 3. Resolve.
     getExistingUser()
       .then((results) => {
 
@@ -70,10 +53,9 @@ const endPoints = {
 
         }
 
-        return getHashedPassword();
+        return buildAndSaveUser();
 
       })
-      .then(buildAndSaveUser)
       .then(() => {
 
         res.send({
@@ -99,12 +81,12 @@ const endPoints = {
     const checkExistingUser = () =>
       new Promise((resolve, reject) =>
         models.User.findOne({ "where": { username } })
-          .then((results) => {
+          .then((user) => {
 
             // If the results yield data, return it as a plain-object (get)
-            if (results) {
+            if (user) {
 
-              return resolve(results.get());
+              return resolve(user);
 
             }
 
@@ -119,7 +101,7 @@ const endPoints = {
     const checkPassword = (user) =>
       new Promise((resolve, reject) => {
 
-        bcrypt.compare(password, user.password)
+        user.isEqualPassword(password)
           .then((isValid) => {
 
             // Throw an error if the password is incorrect

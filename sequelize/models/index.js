@@ -126,15 +126,15 @@ module.exports = {
           () => new Promise((reslv) => {
 
             // Sample data to generate a dummy-user
-            const SALT_ROUNDS = 12;
-            const DEFAULT_PASSWORD = "password1";
+            const DEFAULT_PASSWORD = "password123";
 
             return models.User.create({
               "username": "johnathan",
               "email": "sample@fakemail.ca",
               "first_name": "John",
               "last_name": "Doe",
-              "password": require("bcrypt").hashSync(DEFAULT_PASSWORD, SALT_ROUNDS),
+              "user_type": "superadmin",
+              "password": DEFAULT_PASSWORD,
             }).then(reslv);
 
           }),

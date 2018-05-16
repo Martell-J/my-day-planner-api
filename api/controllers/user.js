@@ -10,7 +10,7 @@ module.exports = {
       "where": {
         "user_id": req.authorization.uid,
       },
-      "attributes": [ "user_id", "username", "email", "first_name", "last_name" ],
+      "attributes": [ "user_id", "username", "email", "first_name", "last_name", "user_type" ],
     })
       .then((results) => res.json({ "user": { ...results.get() }, "exp": req.authorization.exp, "iat": req.authorization.iat }))
       .catch((err) => {
