@@ -1,13 +1,16 @@
 "use strict";
 
+const logObject = require("./logger.js");
+
 class ServerError extends Error {
 
-  constructor({ name, message, code }) {
+  constructor({ name, message, code, stacktrace }) {
 
     super();
     this.name = name || "ServerError";
     this.message = message || "A generic server error has occurred. Please contact an administrator.";
     this.code = code || "SERVER_ERROR";
+    this.stacktrace = stacktrace || "";
 
   }
 
@@ -16,6 +19,18 @@ class ServerError extends Error {
     const { name, message, code } = this;
 
     return { name, message, code };
+
+  }
+
+  log(extra = {}) {
+
+    const { name, message, code, stacktrace } = this;
+
+    logObject({
+      "error": { name, message, code },
+      "details": stacktrace,
+      ...extra,
+    });
 
   }
 
@@ -104,7 +119,24 @@ const errorReducer = (err) => {
 
 };
 
+const sendError = (err, res, status = 400, shouldLog = true) => {
+
+  const reducedError = errorReducer(err);
+
+  if (reducedError instanceof ServerError && shouldLog) {
+
+    const extra = res.authentication || {};
+
+    reducedError.log(extra);
+
+  }
+
+  return res.status(status).json();
+
+};
+
 module.exports = {
   "errors": { ServerError, InvalidTokenError, InvalidUserAuthorityError, ValidationError, AuthenticationError },
   errorReducer,
+  sendError,
 };
