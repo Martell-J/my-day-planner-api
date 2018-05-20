@@ -2,9 +2,19 @@
 
 const log = (logObject) => {
 
-  const ErrorModel = require("../../app").mongoose.Error;
+  const { mongoose, logger } = require("../../app");
 
-  new ErrorModel(logObject).save();
+  if (mongoose) {
+
+    const ErrorModel = mongoose.Error;
+
+    new ErrorModel(logObject).save();
+
+  } else {
+
+    logger.info("Mongoose Errors cannot be logged. Please set up your local MongoDB Database.");
+
+  }
 
 };
 
