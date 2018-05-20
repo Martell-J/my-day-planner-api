@@ -3,11 +3,9 @@
 
 // Put the test for each models and their relational data here...i guess
 const { models } = require("../../app");
-const { errors, errorReducer } = require("../helpers/errorhelper");
+const { errors, errorReducer, sendError } = require("../helpers/errorhelper");
 const { AuthenticationError, ValidationError } = errors;
 const { signJWT } = require("../helpers/auth.js");
-
-const bcrypt = require("bcrypt");
 
 // Error Codes
 const EXISTING_USER = "Username already exists in our system.";
@@ -135,7 +133,7 @@ const endPoints = {
 
         // Reduce any errors outside of the expected error-types.
         // Specifically here, we're dealing with sequelizevalidationerrors
-        return res.status(400).json(errorReducer(err));
+        return sendError(err, res);
 
       });
 

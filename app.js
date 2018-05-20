@@ -23,6 +23,9 @@ const { initializeYAMLRefs } = require("./startup/yamlrefs.js");
 // Initializes the database and builds the relative models/relationships
 const { initializeSequelizeDatabase } = require("./sequelize/models/index.js");
 
+// Initializes the database and builds the relative models/relationships
+const { initializeMongooseDatabase } = require("./mongoose/index.js");
+
 // Set a flag stating that the app is not ready
 app.isReady = false;
 
@@ -125,6 +128,7 @@ initializePreServerOps(app)
   .then(initializeFiles)
   .then(initializeLogger)
   .then(initializeSequelizeDatabase)
+  .then(initializeMongooseDatabase)
   .then(initializeYAMLRefs)
   .then(initializeServerStart)
   .then(initializeMiscellaneous)

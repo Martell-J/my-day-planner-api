@@ -4,13 +4,12 @@ const logObject = require("./logger.js");
 
 class ServerError extends Error {
 
-  constructor({ name, message, code, stacktrace }) {
+  constructor({ name, message, code }) {
 
     super();
     this.name = name || "ServerError";
     this.message = message || "A generic server error has occurred. Please contact an administrator.";
     this.code = code || "SERVER_ERROR";
-    this.stacktrace = stacktrace || "";
 
   }
 
@@ -24,11 +23,11 @@ class ServerError extends Error {
 
   log(extra = {}) {
 
-    const { name, message, code, stacktrace } = this;
+    const { name, message, code, stack } = this;
 
     logObject({
       "error": { name, message, code },
-      "details": stacktrace,
+      "details": stack ? stack : "",
       ...extra,
     });
 
@@ -109,12 +108,6 @@ const errorReducer = (err) => {
 
   }
 
-  // TODO:
-  // NOSQL Error logger to handle unexpected errors in this reducer, then
-  // reduce the error into a ServerError (generic) for user-output
-
-  // Why not go full error-handling mode and create an intuitive UI to access
-  // these errors from on the front end? (We'll need user types and the like.)
   return err;
 
 };
@@ -131,7 +124,7 @@ const sendError = (err, res, status = 400, shouldLog = true) => {
 
   }
 
-  return res.status(status).json();
+  return res.status(status).json(reducedError.toJson());
 
 };
 

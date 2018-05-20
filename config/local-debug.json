@@ -17,6 +17,13 @@
           "encrypt": true
         }
       }
+    },
+    "mongoose": {
+      "username": "test",
+      "password": "password123",
+      "database": "test_example",
+      "host": "localhost",
+      "port": "27017"
     }
   },
   "secret": {

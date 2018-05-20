@@ -2,8 +2,9 @@
 
 const log = (logObject) => {
 
-  // Placeholder
-  return false;
+  const ErrorModel = require("../../app").mongoose.Error;
+
+  new ErrorModel(logObject).save();
 
 };
 

@@ -19,12 +19,12 @@
       }
     },
     "mongoose": {
-      "username": "john",
+      "username": "test",
       "password": "password123",
-      "database": "test_log",
+      "database": "test_example",
       "host": "localhost",
-      "port": "3300"
-    },
+      "port": "27017"
+    }
   },
   "secret": {
     "swagger_ui": {
