@@ -29,7 +29,8 @@
   "secret": {
     "swagger_ui": {
       "username": "admin",
-      "password": "password"
+      "password": "password",
+      "overrideAuthenticationKey": "sampleoverride123"
     },
     "api_key": "samplekey123",
     "jwt_key": "samplejwtkey123"

@@ -1,5 +1,5 @@
 "use strict";
-const { InvalidTokenError } = require("./errorhelper.js").errors;
+const { InvalidTokenError } = require("../../resources/errors.js");
 const cert = require("config").secret.jwt_key;
 const jwt = require("jsonwebtoken");
 

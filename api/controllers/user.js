@@ -1,6 +1,7 @@
 "use strict";
 
 const { models } = require("../../app");
+const { sendError } = require("../helpers/errorhelper");
 
 module.exports = {
 
@@ -8,17 +9,14 @@ module.exports = {
 
     models.User.find({
       "where": {
-        "user_id": req.authorization.uid,
+        "user_id": req.authentication.uid,
       },
       "attributes": [ "user_id", "username", "email", "first_name", "last_name", "user_type" ],
     })
-      .then((results) => res.json({ "user": { ...results.get() }, "exp": req.authorization.exp, "iat": req.authorization.iat }))
+      .then((results) => res.json({ "user": { ...results.get() }, "exp": req.authentication.exp, "iat": req.authentication.iat }))
       .catch((err) => {
 
-        return res.status(400).json({
-          "name": err.name,
-          "message": err.message,
-        });
+        return sendError(err, req, res);
 
       });
 

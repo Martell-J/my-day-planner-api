@@ -1,90 +1,9 @@
 "use strict";
 
-class ServerError extends Error {
-
-  constructor({ name, message, code }) {
-
-    super();
-    this.name = name || "ServerError";
-    this.message = message || "A generic server error has occurred. Please contact an administrator.";
-    this.code = code || "SERVER_ERROR";
-
-  }
-
-  toJson() {
-
-    const { name, message, code } = this;
-
-    return { name, message, code };
-
-  }
-
-  getStack() {
-
-    const { stack } = this;
-
-    return stack ? stack : "";
-
-  }
-
-}
-
-// Subclass the generic error for tokens
-class InvalidTokenError extends ServerError {
-
-  constructor(message = null, code = null) {
-
-    super({
-      "name": "InvalidTokenError",
-      "message": message || "Token passed was invalid.",
-      "code": code || "INVALID_TOKEN",
-    });
-
-  }
-
-}
-
-class InvalidUserAuthorityError extends ServerError {
-
-  constructor(message = null, code = null) {
-
-    super({
-      "name": "InvalidUserAuthorityError",
-      "message": message || "The requested resource is outside of the user's access rights.",
-      "code": code || "INVALID_ACCESS_RIGHTS",
-    });
-
-  }
-
-}
-
-class ValidationError extends ServerError {
-
-  constructor(message, code = "VALIDATION_ERROR") {
-
-    super({
-      "name": "ValidationError",
-      message,
-      "code": code || "VALIDATION_ERROR",
-    });
-
-  }
-
-}
-
-class AuthenticationError extends ServerError {
-
-  constructor(message = null, code = null) {
-
-    super({
-      "name": "AuthenticationError",
-      "message": message || "A generic error has occurred during Authentication.",
-      "code": code || "AUTHENTICATION_ERROR",
-    });
-
-  }
-
-}
+const {
+  ServerError,
+  ValidationError,
+} = require("../../resources/errors.js");
 
 // Pass me a typed ServerError and any extra details
 const logError = (error, extra) => {
@@ -94,7 +13,10 @@ const logError = (error, extra) => {
 
 };
 
-const errorReducer = (err) => {
+const errorReducer = (err, req = null, shouldLog = true) => {
+
+  let reducedError = err;
+  let logOriginal = false;
 
   // Check for sequelize validation errors, reduce them to their meat.
   if (err.name === "SequelizeValidationError") {
@@ -102,38 +24,49 @@ const errorReducer = (err) => {
     // Just get the first error's data.
     const { message, code = "VALIDATION_ERROR" } = err.errors[0];
 
-    return new ValidationError(message, code);
+    reducedError = new ValidationError(message, code);
 
   } else if (err instanceof ServerError) {
 
-    return err;
+    reducedError = err;
+
+  } else {
+
+    reducedError = new ServerError({});
+    logOriginal = true;
 
   }
 
-  return err;
+  if (shouldLog) {
 
-};
+    const extra = {};
 
-const sendError = (err, res, status = 400, shouldLog = true) => {
+    if (req.authentication && req.authentication.uid) {
 
-  const reducedError = errorReducer(err);
+      extra.userid = req.authentication.uid;
 
-  if (reducedError instanceof ServerError && shouldLog) {
+    }
 
-    const extra = res.authentication || {};
-
-    logError(reducedError, {
+    logError(logOriginal ? err : reducedError, {
       ...extra,
     });
 
   }
+
+  // ALWAYS return a typed ServerError
+  return reducedError;
+
+};
+
+const sendError = (err, req, res, status = 400, shouldLog = true) => {
+
+  const reducedError = errorReducer(err, req, shouldLog);
 
   return res.status(status).json(reducedError.toJson());
 
 };
 
 module.exports = {
-  "errors": { ServerError, InvalidTokenError, InvalidUserAuthorityError, ValidationError, AuthenticationError },
   errorReducer,
   sendError,
 };

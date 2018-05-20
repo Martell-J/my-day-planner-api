@@ -124,37 +124,28 @@ const initializeMiscellaneous = () => {
     // Overwrite the existing error logger to handle an object being passed.
     app.logger.error = (error, extra) => {
 
-      const { ServerError } = require("./api/helpers/errorhelper").errors;
+      if (mongoose) {
 
-      if (error instanceof ServerError) {
+        const ErrorModel = mongoose.Error;
 
-        if (mongoose) {
-
-          const ErrorModel = mongoose.Error;
-
-          new ErrorModel({
-            "error": {
-              ...error.toJson(),
-            },
-            "details": error.getStack(),
-            ...extra,
-          }).save();
-
-        } else {
-
-          app.logger.info("Mongoose Errors cannot be logged. Please set up your local MongoDB Database.");
-
-        }
+        new ErrorModel({
+          "error": {
+            ...error.toJson ? error.toJson() : error,
+          },
+          "details": error.getStack ? error.getStack() : "",
+          ...extra,
+        }).save();
 
       } else {
 
-        previousErrorLogger(error);
+        app.logger.info("Mongoose Errors cannot be logged. Please set up your local MongoDB Database.");
 
       }
 
       if (debug) {
 
         previousErrorLogger("Error sent to logging database.");
+        previousErrorLogger(error);
 
       }
 
