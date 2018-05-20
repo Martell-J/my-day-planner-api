@@ -1,7 +1,5 @@
 "use strict";
 
-const logObject = require("./logger.js");
-
 class ServerError extends Error {
 
   constructor({ name, message, code }) {
@@ -21,15 +19,11 @@ class ServerError extends Error {
 
   }
 
-  log(extra = {}) {
+  getStack() {
 
-    const { name, message, code, stack } = this;
+    const { stack } = this;
 
-    logObject({
-      "error": { name, message, code },
-      "details": stack ? stack : "",
-      ...extra,
-    });
+    return stack ? stack : "";
 
   }
 
@@ -92,6 +86,14 @@ class AuthenticationError extends ServerError {
 
 }
 
+// Pass me a typed ServerError and any extra details
+const logError = (error, extra) => {
+
+  const log = require("../../app").logger.error;
+  log(error, extra);
+
+};
+
 const errorReducer = (err) => {
 
   // Check for sequelize validation errors, reduce them to their meat.
@@ -120,7 +122,9 @@ const sendError = (err, res, status = 400, shouldLog = true) => {
 
     const extra = res.authentication || {};
 
-    reducedError.log(extra);
+    logError(reducedError, {
+      ...extra,
+    });
 
   }
 
