@@ -89,8 +89,6 @@ module.exports = {
                 // the data acquired via auth
                 req.authentication = decoded;
 
-                console.log(req.authentication)
-
                 return callback();
 
               })
