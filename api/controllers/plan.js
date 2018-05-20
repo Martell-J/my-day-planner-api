@@ -1,7 +1,7 @@
 "use strict";
 
 const { models } = require("../../app");
-const { errorReducer } = require("../helpers/errorhelper.js");
+const { sendError } = require("../helpers/errorhelper.js");
 
 module.exports = {
 
@@ -9,33 +9,22 @@ module.exports = {
 
     models.Plan.findAll({
       "where": {
-        "user_id": req.authorization.uid,
+        "user_id": req.authentication.uid,
       },
     })
       .then((results) => res.json({ ...results }))
-      .catch((err) => {
-
-        return res.status(400).json({
-          "name": err.name,
-          "message": err.message,
-        });
-
-      });
+      .catch((err) => sendError(err, req, res));
 
 
   },
 
   "addPlan": (req, res) => {
 
-    const data = { ...req.swagger.params.data.value, "user_id": req.authorization.uid };
+    const data = { ...req.swagger.params.data.value, "user_id": req.authentication.uid };
 
     models.Plan.create(data)
       .then((result) => res.json({ ...result.get() }))
-      .catch((err) => {
-
-        return res.status(400).json(errorReducer(err));
-
-      });
+      .catch((err) => sendError(err, req, res));
 
   },
 

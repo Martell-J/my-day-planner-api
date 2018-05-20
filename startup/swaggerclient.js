@@ -1,7 +1,7 @@
 "use strict";
 
 const { verifyJWT } = require("../api/helpers/auth.js");
-const { ServerError, InvalidUserAuthorityError, InvalidTokenError } = require("../api/helpers/errorhelper.js").errors;
+const { ServerError, InvalidUserAuthorityError, InvalidTokenError } = require("../resources/errors.js");
 const Promise = require("bluebird");
 
 module.exports = {
@@ -68,12 +68,28 @@ module.exports = {
           },
           "Authentication": (req, res, callback) => {
 
+            // TODO: Add env to this handler, check for type outside production
+            // Override all requests if the override key is passed (for testing only)
+            /*
+            if (req.headers.authentication === secret.swagger_ui.overrideAuthenticationKey) {
+
+              req.authentication = {
+                "uid": 0,
+              };
+
+              return callback();
+
+            }
+            */
+
             verifyJWT(req.headers.authentication)
               .then((decoded) => {
 
                 // Set the authorization parameter of the request object to contain
                 // the data acquired via auth
-                req.authorization = decoded;
+                req.authentication = decoded;
+
+                console.log(req.authentication)
 
                 return callback();
 

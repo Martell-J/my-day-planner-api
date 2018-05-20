@@ -3,8 +3,8 @@
 
 // Put the test for each models and their relational data here...i guess
 const { models } = require("../../app");
-const { errors, errorReducer, sendError } = require("../helpers/errorhelper");
-const { AuthenticationError, ValidationError } = errors;
+const { sendError } = require("../helpers/errorhelper");
+const { AuthenticationError, ValidationError } = require("../../resources/errors.js");
 const { signJWT } = require("../helpers/auth.js");
 
 // Error Codes
@@ -61,11 +61,7 @@ const endPoints = {
         });
 
       })
-      .catch((err) => {
-
-        return res.status(400).send(errorReducer(err));
-
-      });
+      .catch((err) => sendError(err, req, res));
 
   },
 
@@ -129,13 +125,7 @@ const endPoints = {
         "message": "You have successfully logged in!",
         token,
       }))
-      .catch((err) => {
-
-        // Reduce any errors outside of the expected error-types.
-        // Specifically here, we're dealing with sequelizevalidationerrors
-        return sendError(err, res);
-
-      });
+      .catch((err) => sendError(err, req, res));
 
   },
 

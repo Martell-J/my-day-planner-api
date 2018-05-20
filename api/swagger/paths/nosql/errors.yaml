@@ -1,0 +1,17 @@
+x-swagger-router-controller: nosql_error
+get:
+  # Must have the API key
+  security:
+    - GlobalSecurity: []
+      Authentication: []
+  description: Retrieves all error-logs made by the user requesting the resource
+  operationId: getAllErrorLogs
+  responses:
+      "200":
+        description: Success
+        schema:
+          $ref: "#/definitions/SuccessResponse"
+      default:
+        description: Error
+        schema:
+          $ref: "#/definitions/ErrorResponse"

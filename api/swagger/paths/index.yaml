@@ -24,5 +24,7 @@
   $ref: ./plan/plans.yaml
 /plan:
   $ref: ./plan/plan.yaml
+/nosql/log/errors:
+  $ref: ./nosql/errors.yaml
 /token/verify:
   $ref: ./user/userbytoken.yaml
