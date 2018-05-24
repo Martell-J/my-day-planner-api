@@ -22,7 +22,8 @@ module.exports = {
       // sign asynchronously
       jwt.sign({
         "iat": NOW,
-        "uid": user.user_id,
+        "user_id": user.user_id,
+        "user_type": user.user_type,
         "exp": NOW + SECONDS * MINUTES * HOURS * DAYS,
       }, cert, {}, (err, token) => {
 

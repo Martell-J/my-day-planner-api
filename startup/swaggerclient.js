@@ -4,6 +4,8 @@ const { verifyJWT } = require("../api/helpers/auth.js");
 const { ServerError, InvalidUserAuthorityError, InvalidTokenError } = require("../resources/errors.js");
 const Promise = require("bluebird");
 
+const SUPER_USER = "superadmin";
+
 module.exports = {
 
   "initializeSwaggerClient": (app) => {
@@ -70,17 +72,51 @@ module.exports = {
 
             // TODO: Add env to this handler, check for type outside production
             // Override all requests if the override key is passed (for testing only)
-            /*
+
             if (req.headers.authentication === secret.swagger_ui.overrideAuthenticationKey) {
 
               req.authentication = {
-                "uid": 0,
+                "user_id": 0,
+                "user_type": "superadmin",
               };
 
               return callback();
 
             }
-            */
+
+            // Allows for verification of correct access rights by typical auth
+            // terminology (E.G user_type)
+            const verifyByScopeExtension = () => {
+
+              return new Promise((reslv, rejct) => {
+
+                let authScopes = req.swagger.operation["x-authentication-scopes"];
+
+                if (authScopes) {
+
+                  if (authScopes.hasOwnProperty("user")) {
+
+                    const userScopes = authScopes.user.scopes;
+
+                    const userType = req.authentication.user_type;
+
+                    // Scope to a user_type to verify whether or not they're allowed to access this resource.
+                    if (userType !== SUPER_USER && userScopes.length !== 0 && !userScopes.find((scope) => scope === req.authentication.user_type)) {
+
+                      return rejct(new InvalidUserAuthorityError());
+
+                    }
+
+                  }
+
+                }
+
+                return reslv();
+
+              });
+
+            };
+
 
             verifyJWT(req.headers.authentication)
               .then((decoded) => {
@@ -89,9 +125,9 @@ module.exports = {
                 // the data acquired via auth
                 req.authentication = decoded;
 
-                return callback();
-
               })
+              .then(verifyByScopeExtension)
+              .then(() => callback())
               .catch((e) => {
 
                 // Conditional scoping for user-view
