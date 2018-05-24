@@ -6,6 +6,16 @@ get:
       Authentication: []
   description: Retrieves all error-logs made by the user requesting the resource
   operationId: getAllErrorLogs
+  x-authentication-scopes:
+    user:
+      scopes: ["superadmin"]
+  parameters:
+    - name: count
+      in: query
+      type: integer
+    - name: page
+      in: query
+      type: integer
   responses:
       "200":
         description: Success
