@@ -18,7 +18,7 @@ const tieModelsIn = (connection) =>
       .forEach((file, i, array) => {
 
         // Tie the model into the connection object
-        const model = require(path.join(modelDir, file))(connection, mongoose);
+        require(path.join(modelDir, file))(connection, mongoose);
 
         // TODO: Check to see if documents exist the model's associated collection, and
         // delete them if they do.

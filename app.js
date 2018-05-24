@@ -36,8 +36,16 @@ app.debug = debug;
 
 process.on("unhandledRejection", (err) => {
 
-  // Actually throw stack-traces for unhandled rejections (mainly for promise debugging)
-  throw err;
+  if (app.logger) {
+
+    app.logger.error(err);
+
+  } else {
+
+    // Actually throw stack-traces for unhandled rejections (mainly for promise debugging)
+    throw err;
+
+  }
 
 });
 
@@ -124,7 +132,7 @@ const initializeMiscellaneous = () => {
     // Overwrite the existing error logger to handle an object being passed.
     app.logger.error = (error, extra) => {
 
-      if (mongoose) {
+      if (mongoose && error) {
 
         const ErrorModel = mongoose.Error;
 

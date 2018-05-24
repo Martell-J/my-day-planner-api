@@ -41,9 +41,9 @@ const errorReducer = (err, req = null, shouldLog = true) => {
 
     const extra = {};
 
-    if (req.authentication && req.authentication.uid) {
+    if (req.authentication && req.authentication.user_id) {
 
-      extra.userid = req.authentication.uid;
+      extra.userid = req.authentication.user_id;
 
     }
 
