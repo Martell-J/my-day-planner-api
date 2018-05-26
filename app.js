@@ -138,9 +138,9 @@ const initializeMiscellaneous = () => {
 
         new ErrorModel({
           "error": {
-            ...error.toJson ? error.toJson() : error,
+            ...error.toJson ? error.toJson() : { "raw": error.toString ? error.toString() : "Not of extensible or of type 'Error'" },
           },
-          "details": error.getStack ? error.getStack() : "",
+          "details": error.getStack ? error.getStack() : error.stack ? error.stack : "",
           ...extra,
         }).save();
 
