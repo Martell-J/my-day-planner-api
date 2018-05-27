@@ -11,6 +11,7 @@ const { signJWT } = require("../helpers/auth.js");
 const EXISTING_USER = "Username already exists in our system.";
 const NO_USER = "Username does not exist in our system.";
 const INCORRECT_PASSWORD = "Password is incorrect.";
+const DISABLED_ACCOUNT = "Your account has been disabled.";
 
 const endPoints = {
 
@@ -79,6 +80,12 @@ const endPoints = {
 
             // If the results yield data, return it as a plain-object (get)
             if (user) {
+
+              if (user.user_type === "disabled") {
+
+                return reject(new AuthenticationError(DISABLED_ACCOUNT, "DISABLED_ACCOUNT"));
+
+              }
 
               return resolve(user);
 

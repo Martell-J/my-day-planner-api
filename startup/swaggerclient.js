@@ -72,7 +72,8 @@ module.exports = {
 
             // TODO: Add env to this handler, check for type outside production
             // Override all requests if the override key is passed (for testing only)
-
+            // Uncomment during testing
+            /*
             if (req.headers.authentication === secret.swagger_ui.overrideAuthenticationKey) {
 
               req.authentication = {
@@ -83,6 +84,7 @@ module.exports = {
               return callback();
 
             }
+            */
 
             // Allows for verification of correct access rights by typical auth
             // terminology (E.G user_type)
@@ -101,7 +103,7 @@ module.exports = {
                     const userType = req.authentication.user_type;
 
                     // Scope to a user_type to verify whether or not they're allowed to access this resource.
-                    if (userType !== SUPER_USER && userScopes.length !== 0 && !userScopes.find((scope) => scope === req.authentication.user_type)) {
+                    if (userType !== SUPER_USER && userScopes.length !== 0 && !userScopes.find((scope) => scope === userType)) {
 
                       return rejct(new InvalidUserAuthorityError());
 
