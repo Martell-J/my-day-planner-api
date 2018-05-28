@@ -9,7 +9,7 @@ module.exports = {
 
     models.Plan.findAll({
       "where": {
-        "user_id": req.authentication.uid,
+        "user_id": req.authentication.user_id,
       },
     })
       .then((results) => res.json({ ...results }))
@@ -20,7 +20,7 @@ module.exports = {
 
   "addPlan": (req, res) => {
 
-    const data = { ...req.swagger.params.data.value, "user_id": req.authentication.uid };
+    const data = { ...req.swagger.params.data.value, "user_id": req.authentication.user_id };
 
     models.Plan.create(data)
       .then((result) => res.json({ ...result.get() }))
