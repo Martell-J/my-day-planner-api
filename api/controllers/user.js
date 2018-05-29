@@ -13,7 +13,7 @@ module.exports = {
       },
       "attributes": [ "user_id", "username", "email", "first_name", "last_name", "user_type" ],
     })
-      .then((results) => res.json({ "user_id": { ...results.get() }, "exp": req.authentication.exp, "iat": req.authentication.iat }))
+      .then((results) => res.json({ "user": { ...results.get() }, "exp": req.authentication.exp, "iat": req.authentication.iat }))
       .catch((err) => {
 
         return sendError(err, req, res);
