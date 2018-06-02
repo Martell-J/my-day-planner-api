@@ -13,18 +13,18 @@ module.exports = {
   "signJWT": (user) =>
     new Promise((resolve, reject) => {
 
-      const DAYS = 1,
-        HOURS = 24,
-        MINUTES = 60,
+      const DAYS = 0,
+        HOURS = 0,
+        MINUTES = 0,
         NOW = Math.floor(Date.now() / 1000),
-        SECONDS = 60;
+        SECONDS = 10;
 
       // sign asynchronously
       jwt.sign({
-        "iat": NOW,
+        "issued": NOW, // Issued right now
         "user_id": user.user_id,
         "user_type": user.user_type,
-        "exp": NOW + SECONDS * MINUTES * HOURS * DAYS,
+        "expiry": NOW + SECONDS * MINUTES * HOURS * DAYS, // Forecast the expiry date to the current date + the length of the token's expiry
       }, cert, {}, (err, token) => {
 
         // If there an error signing, pass it up the chain
@@ -59,7 +59,7 @@ module.exports = {
 
           }
 
-          if (decoded.exp >= Math.floor(Date.now() / 1000)) {
+          if (decoded.expiry >= Math.floor(Date.now() / 1000)) {
 
             return resolve(decoded);
 

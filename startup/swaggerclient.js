@@ -134,13 +134,7 @@ module.exports = {
 
                 // Conditional scoping for user-view
                 // * Generify the error if the details aren't pertinent to what a user should be seeing
-                if (e instanceof InvalidTokenError) {
-
-                  app.logger.error(e);
-
-                  return callback(new InvalidUserAuthorityError());
-
-                } else if (e instanceof ServerError) {
+                if (e instanceof ServerError) {
 
                   return callback(e);
 
