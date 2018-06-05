@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports = (mongodb, mongoose) => {
+module.exports = (mongoose) => {
 
   const ErrorSchema = new mongoose.Schema({
     "userid": { "type": Number, "required": false },
@@ -9,6 +9,6 @@ module.exports = (mongodb, mongoose) => {
     "error": { "type": mongoose.Schema.Types.Mixed, "required": true, "default": {} },
   }, { "versionKey": false, "strict": true, "collection": "errors", "minimize": false });
 
-  return mongodb.model("Error", ErrorSchema);
+  return mongoose.model("Error", ErrorSchema);
 
 };
