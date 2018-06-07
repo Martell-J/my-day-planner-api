@@ -1,11 +1,11 @@
 {
-  "name": "swagger-boilerplate-api",
-  "version": "0.0.1",
+  "name": "my-day-planner-api",
   "author": "Johnathan Martell",
   "contributors": [
     {
       "name": "Scott Rocha",
-      "email": "s.rocha@pc-serv.ca"
+      "email": "s.rocha@pc-serv.ca",
+      "details": "Assisted in development of root-repository 'swagger-express-boilerplate'."
     }
   ],
   "repository": {

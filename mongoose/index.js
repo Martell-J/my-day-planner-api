@@ -8,7 +8,7 @@ const path = require("path");
 const config = require("config");
 const mongo = config.connection.mongoose;
 
-const tieModelsIn = (connection) =>
+const tieModelsIn = () =>
   new Promise((resolve) => {
 
     const modelDir = path.join(__dirname, "/models");
@@ -18,7 +18,7 @@ const tieModelsIn = (connection) =>
       .forEach((file, i, array) => {
 
         // Tie the model into the connection object
-        require(path.join(modelDir, file))(connection, mongoose);
+        require(path.join(modelDir, file))(mongoose);
 
         // TODO: Check to see if documents exist the model's associated collection, and
         // delete them if they do.
@@ -48,58 +48,33 @@ module.exports = {
         + mongo.port + "/"
         + mongo.database;
 
-      const connection = mongoose.createConnection(dbConnectionString, {
+      // Now promise-based.
+      mongoose.connect(dbConnectionString, {
         "keepAlive": true,
-      });
-
-      connection.on("connecting", () => {
-
-        app.logger.info("connecting to MongoDB...");
-
-      });
-
-      connection.on("error", (error) => {
-
-        app.logger.error("Error in MongoDb connection: " + error);
-        mongoose.disconnect();
-
-      });
-
-      connection.on("open", () => {
-
-        app.logger.info("MongoDB connection opened!");
-
-      });
-
-      connection.on("connected", () => {
+        "auto_reconnect": true,
+      }).then(() => {
 
         app.logger.info("MongoDB connected!");
 
+        return tieModelsIn()
+          .then(() => {
+
+            // Connection object will now have Models
+            app.mongoose = mongoose.models;
+
+            return resolve(app);
+
+          });
+
+      })
+      .catch((err) => {
+
+        app.logger.error(err);
+
+        app.mongoose = null;
+        return resolve(app);
+        
       });
-
-      connection.on("reconnected", () => {
-
-        app.logger.info("MongoDB reconnected!");
-
-      });
-
-      connection.on("disconnected", () => {
-
-        app.logger.info("MongoDB disconnected!");
-
-        mongoose.connect(dbConnectionString, { "server": { "auto_reconnect": true } });
-
-      });
-
-      return tieModelsIn(connection)
-        .then(() => {
-
-          // Connection object will now have Models
-          app.mongoose = connection.models;
-
-          return resolve(app);
-
-        });
 
     });
 
