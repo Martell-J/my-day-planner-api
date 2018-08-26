@@ -2,6 +2,10 @@
 const { InvalidTokenError } = require("../../resources/errors.js");
 const cert = require("config").secret.jwt_key;
 const jwt = require("jsonwebtoken");
+const multipleToMillis = (value, type = "seconds") =>
+  type === "minutes" ? (parseInt(value * 1000 * 60)) :
+  type === "hours" ? (parseInt(value * 1000 * 60 * 60)) :
+  type === "days" ? parseInt(value * 1000 * 60 * 60 * 60) : parseInt(value * 1000)
 
 const NO_TOKEN = "No token provided.";
 const TOKEN_EXPIRED = "Token has expired.";
@@ -14,17 +18,21 @@ module.exports = {
     new Promise((resolve, reject) => {
 
       const DAYS = 0,
-        HOURS = 0,
+        HOURS = 12,
         MINUTES = 0,
         NOW = Math.floor(Date.now() / 1000),
-        SECONDS = 10;
+        SECONDS = 0;
 
       // sign asynchronously
       jwt.sign({
         "issued": NOW, // Issued right now
         "user_id": user.user_id,
         "user_type": user.user_type,
-        "expiry": NOW + SECONDS * MINUTES * HOURS * DAYS, // Forecast the expiry date to the current date + the length of the token's expiry
+        "expiry": NOW
+          + multipleToMillis(SECONDS)
+          + multipleToMillis(MINUTES, "minutes")
+          + multipleToMillis(HOURS, "hours")
+          + multipleToMillis(DAYS, "days"), // Forecast the expiry date to the current date + the length of the token's expiry
       }, cert, {}, (err, token) => {
 
         // If there an error signing, pass it up the chain

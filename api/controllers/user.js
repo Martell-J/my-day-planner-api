@@ -14,11 +14,7 @@ module.exports = {
       "attributes": [ "user_id", "username", "email", "first_name", "last_name", "user_type" ],
     })
       .then((results) => res.json({ "user": { ...results.get() }, "expiry": req.authentication.expiry, "issued": req.authentication.issued }))
-      .catch((err) => {
-
-        return sendError(err, req, res);
-
-      });
+      .catch((err) => sendError(err, req, res));
 
 
   },
