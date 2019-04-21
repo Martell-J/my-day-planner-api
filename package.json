@@ -47,7 +47,7 @@
     "sequelize-cli": "3.2.0",
     "swagger-express-mw": "0.7.0",
     "swagger-ui-express": "2.0.14",
-    "winston": "2.4.0"
+    "winston": "3.2.0"
   },
   "devDependencies": {
     "eslint": "4.16.0"

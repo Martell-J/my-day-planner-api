@@ -114,6 +114,8 @@ module.exports = {
         const sequentiallyIteratePromises = (promiseArray) =>
           Promise.each(promiseArray, (pf) => pf(), { "concurrency": 1 });
 
+        app.logger.info(models);
+
         const modelArray = Object.values(models).sort((mod1, mod2) => mod1.options.syncOrder - mod2.options.syncOrder);
 
         // Create all tables in syncOrder
@@ -148,39 +150,81 @@ module.exports = {
 
       });
 
+    const syncDB = (models) =>
+      new Promise((reslv, rjct) =>
+        sequelize.authenticate()
+          .then(() => reslv(models))
+          .catch((error) => {
+
+            // Will have an 'original' property
+            const code = error.original.code || "N/A";
+
+            // Create the database if it doesn't exist, then force-sync to match the schema to
+            // our database.
+            if (code === "ER_BAD_DB_ERROR") {
+
+              app.logger.info("Syncing DB. First run?");
+
+              const {options, password, username} = connection.sequelize;
+
+              let seq = new Sequelize("", username, password, options)
+
+              return seq.query("CREATE DATABASE " + config.connection.sequelize.database + ";")
+                .then(() => reslv(models));
+
+            } else {
+
+              return rjct(new ServerError(error));
+
+            }
+
+
+          })
+      );
+
+    const tieRelationships = (models) =>
+      new Promise((resolve, reject) => {
+
+        // If we have all of the models, just tie in the connection model, and the assets object
+        if (Object.keys(db).length === 0) {
+
+          app.models = { sequelize, Sequelize };
+
+          app.logger.info("Empty Sequelize Instance Initialized!");
+
+          return resolve(app);
+
+        }
+
+        // Tie the relationships in before processing
+        require("./relations/index")(models)
+          .then((modelsWithRelations) => {
+
+            // Tie in all relations, then append the sequelize connection model/object to the models
+            // object
+            modelsWithRelations.sequelize = sequelize;
+            modelsWithRelations.Sequelize = Sequelize;
+
+            return resolve(modelsWithRelations);
+
+          });
+
+      })
+
     return new Promise((resolve) => {
 
       return getModelDefinitions()
+        .then(syncDB)
         .then(orderAndSync)
-        .then((models) => {
+        .then(tieRelationships)
+        .then((modelsWithRelations) => {
 
-          // If we have all of the models, just tie in the connection model, and the assets object
-          if (Object.keys(db).length === 0) {
+          // Handle at end...
+          app.models = modelsWithRelations;
 
-            app.models = { sequelize, Sequelize };
+          app.logger.info("Sequelize Instance Initialized!");
 
-            app.logger.info("Empty Sequelize Instance Initialized!");
-
-            return resolve(app);
-
-          }
-
-          // Tie the relationships in before processing
-          require("./relations/index")(models)
-            .then((modelsWithRelations) => {
-
-              // Tie in all relations, then append the sequelize connection model/object to the models
-              // object
-              modelsWithRelations.sequelize = sequelize;
-              modelsWithRelations.Sequelize = Sequelize;
-
-              app.models = modelsWithRelations;
-
-              app.logger.info("Sequelize Instance Initialized!");
-
-              return resolve(app);
-
-            });
+          return resolve(app);
 
         })
         .catch((err) => {

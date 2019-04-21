@@ -1,14 +1,18 @@
 "use strict";
 
 const winston = require("winston");
-winston.emitErrs = true;
 
 module.exports = {
   "initializeLogger": (app) => {
 
     return new Promise((resolve) => {
 
-      const logger = new winston.Logger({
+      const logger = winston.createLogger({
+        "level": "info",
+        "format": winston.format.combine(
+          winston.format.colorize(),
+          winston.format.simple()
+        ),
         "transports": [
           new winston.transports.File({
             "name": "info",
@@ -69,6 +73,11 @@ module.exports = {
       app.logger = logger;
 
       resolve(app);
+
+    }).catch((err) => {
+
+      //console.error(err);
+      return Promise.reject(err);
 
     });
 

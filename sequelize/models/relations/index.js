@@ -7,7 +7,7 @@ const throughJunction = require("./foreignthroughjunction.js");
 module.exports = (models) =>
   new Promise((resolve) => {
 
-    onTarget(models)
+    return onTarget(models)
       .then(onSource)
       .then(throughJunction)
       .then((modelsWithRelations) =>
