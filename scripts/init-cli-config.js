@@ -44,7 +44,11 @@ getEnvs()
 
       }
 
-      fs.writeFile("./sequelize/config/config.json", JSON.stringify(config), "utf8");
+      fs.writeFile("./sequelize/config/config.json", JSON.stringify(config), "utf8", (err) => {
+
+        console.log(err);
+
+      });
 
     });
 

@@ -72,6 +72,8 @@ module.exports = {
 
       app.logger = logger;
 
+      logger.debug("Logger initialized!");
+
       resolve(app);
 
     }).catch((err) => {

@@ -18,6 +18,7 @@
     "local-debug": "node ./node_modules/cross-env/dist/bin/cross-env NODE_ENV=local-debug node app.js",
     "test": "swagger project test",
     "lint": "eslint api handlers mock persist sequelize test app.js --quiet",
+    "seq-init": "node ./scripts/init-cli-config.js",
     "sequelize": "node ./node_modules/.bin/sequelize"
   },
   "engines": {
@@ -26,7 +27,7 @@
   },
   "dependencies": {
     "axios": "0.17.1",
-    "bcrypt": "^1.0.3",
+    "bcrypt": ">=2.0.0",
     "bluebird": "3.5.1",
     "config": "1.29.2",
     "continuation-local-storage": "3.2.1",
@@ -40,10 +41,10 @@
     "jsonwebtoken": "^8.1.1",
     "moment": "2.20.1",
     "mongoose": "^5.1.1",
-    "morgan": "1.9.0",
+    "morgan": ">=1.9.1",
     "mysql2": "1.5.1",
     "secure-route": "3.0.1",
-    "sequelize": "4.32.1",
+    "sequelize": ">=5.3.0",
     "sequelize-cli": "3.2.0",
     "swagger-express-mw": "0.7.0",
     "swagger-ui-express": "2.0.14",

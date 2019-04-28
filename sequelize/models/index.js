@@ -3,6 +3,7 @@
 const fs = require("fs");
 const Promise = require("bluebird");
 const path = require("path");
+const { ServerError } = require("../../resources/errors.js");
 
 // Tie in CLS-
 
@@ -12,6 +13,8 @@ Sequelize.useCLS(namespace);
 
 module.exports = {
   "initializeSequelizeDatabase": (app) => {
+
+    app.logger.debug("Initializing sequelize DB...");
 
     const basename = path.basename(module.filename);
     const config = require("config");
@@ -127,6 +130,7 @@ module.exports = {
         const postServerOps = [
           () => new Promise((reslv) => {
 
+            app.logger.debug("Creating a temporary dev user...");
             // Sample data to generate a dummy-user
             const DEFAULT_PASSWORD = "password123";
 
@@ -137,7 +141,13 @@ module.exports = {
               "last_name": "Doe",
               "user_type": "superadmin",
               "password": DEFAULT_PASSWORD,
-            }).then(reslv);
+            }).then((u) => {
+
+              console.log(u);
+
+              return reslv(u);
+
+            });
 
           }),
         ];
@@ -222,7 +232,7 @@ module.exports = {
           // Handle at end...
           app.models = modelsWithRelations;
 
-          app.logger.info("Sequelize Instance Initialized!");
+          app.logger.debug("Sequelize Instance Initialized!");
 
           return resolve(app);
 
