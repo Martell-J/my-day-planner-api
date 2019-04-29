@@ -128,7 +128,7 @@ module.exports = {
         const dropAllTablesPromises = modelArray.map((modr) => () => modr.drop()).reverse();
 
         const postServerOps = [
-          () => new Promise((reslv) => {
+          () => new Promise((reslv, rejct) => {
 
             app.logger.debug("Creating a temporary dev user...");
             // Sample data to generate a dummy-user
@@ -143,11 +143,17 @@ module.exports = {
               "password": DEFAULT_PASSWORD,
             }).then((u) => {
 
-              console.log(u);
+              if (u) {
 
-              return reslv(u);
+                app.logger.info("User created! Ignore the '?' generated in the debug log.");
+                return reslv(u);
+              } else {
+
+                return rejct(new ServerError("User initialization failed!"))
+              }
 
             });
+
 
           }),
         ];
