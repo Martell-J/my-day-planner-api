@@ -129,10 +129,10 @@ const initializeMiscellaneous = () => {
 
     const { mongoose } = app;
 
-    // Overwrite the existing error logger to handle an object being passed.
-    app.logger.error = (error, extra) => {
+    if (mongoose) {
 
-      if (mongoose && error) {
+      // Overwrite the existing error logger to handle an object being passed.
+      app.logger.error = (error, extra) => {
 
         const ErrorModel = mongoose.Error;
 
@@ -144,20 +144,15 @@ const initializeMiscellaneous = () => {
           ...extra,
         }).save();
 
-      } else {
-
-        app.logger.info("Mongoose Errors cannot be logged. Please set up your local MongoDB Database.");
-
-      }
-
-      if (debug) {
-
         previousErrorLogger("Error sent to logging database.");
-        previousErrorLogger(error);
 
       }
 
-    };
+    } else {
+
+      app.logger.info("Mongoose Errors cannot be logged. Please set up your local MongoDB Database.");
+
+    }
 
     module.exports = app;
 
