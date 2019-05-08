@@ -65,7 +65,11 @@ module.exports = {
 
             }
 
-            return callback(new InvalidUserAuthorityError());
+            const scopeError = new InvalidUserAuthorityError();
+
+            app.logger.error(scopeError)
+
+            return callback(scopeError);
 
           },
           "Authentication": (req, res, callback) => {
@@ -171,7 +175,7 @@ module.exports = {
             // If the path exists, log the details of it (Path, Controller, Operation, TimeStamp)
             if (pathSpec) {
 
-              app.logger.info("Request details:\n\t"
+              logger.info("Request details:\n\t"
                 + "Path: " + pathSpec.path + "\n\t"
                 + "Controller: " + pathSpec["x-swagger-router-controller"] + "\n\t"
                 + "Operation: " + pathSpec.definition[req.method.toLowerCase()].operationId + "\n\t"
@@ -191,7 +195,7 @@ module.exports = {
         // install middleware
         swaggerExpress.register(app);
 
-        app.logger.info("Swagger Client Created");
+        logger.info("Swagger Client Created");
 
         // UI for the API is on /ui
         app.use("/ui", swaggerUi.serve, swaggerUi.setup(app.resolvedSwaggerMU));
@@ -206,7 +210,7 @@ module.exports = {
 
             }
 
-            app.logger.error(swmwErr);
+            logger.error(swmwErr);
 
             if (swmwErr.hasOwnProperty("errors")) {
 
@@ -229,7 +233,7 @@ module.exports = {
 
         });
 
-        app.logger.info("Swagger UI Client Created");
+        logger.info("Swagger UI Client Created");
 
         resolve(app);
 

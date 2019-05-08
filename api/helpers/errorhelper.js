@@ -5,11 +5,12 @@ const {
   ValidationError,
 } = require("../../resources/errors.js");
 
+const { logger } = require("../../app");
+
 // Pass me a typed ServerError and any extra details
 const logError = (error, extra) => {
 
-  const log = require("../../app").logger.error;
-  log(error, extra);
+  return logger.error(error, extra);
 
 };
 
@@ -37,6 +38,8 @@ const errorReducer = (err, req = null, shouldLog = true) => {
 
   }
 
+  console.log(shouldLog + "SL")
+
   if (shouldLog) {
 
     const extra = {};
@@ -46,6 +49,8 @@ const errorReducer = (err, req = null, shouldLog = true) => {
       extra.userid = req.authentication.user_id;
 
     }
+
+    console.log("We're logging it...")
 
     logError(logOriginal ? err : reducedError, {
       ...extra,
@@ -60,9 +65,11 @@ const errorReducer = (err, req = null, shouldLog = true) => {
 
 const sendError = (err, req, res, status = 400, shouldLog = true) => {
 
-  const reducedError = errorReducer(err, req, shouldLog);
+  console.log("Wrapping error!")
 
-  return res.status(status).json(reducedError.toJson());
+  const reducedError = errorReducer(err, req, shouldLog).toJson();
+
+  return res.status(status).json(reducedError);
 
 };
 

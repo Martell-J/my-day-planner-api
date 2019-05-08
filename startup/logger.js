@@ -61,16 +61,66 @@ module.exports = {
       logger.debug("Overriding \"Express\" logger");
 
       const stream = {
-        "write"(message) {
+        "write": (message) => {
 
           logger.info(message);
 
         },
       };
 
+      const logWrapper = (message) => {
+
+        if (app.mongoose) {
+
+          const { mongoose } = app;
+
+          const LogModel = mongoose.Log;
+
+          const detailContext = !(message instanceof Error) ? { "type": "generic", "details": message } : {
+            ...message.toJson ? message.toJson() : { "raw": message.toString ? message.toString() : "Not of extensible or of type 'Error'" },
+            "type": "error",
+          };
+
+          new LogModel({
+            "log": {
+              ...detailContext
+            },
+            "details": message.getStack ? message.getStack() : message.stack ? message.stack : ""
+          }).save();
+
+        }
+
+        return message;
+
+      }
+
       app.use(require("morgan")("combined", { stream }));
 
-      app.logger = logger;
+      app.coreLogger = logger;
+
+      app.logger = {
+          "log": (level, message) => {
+              logger.log(level, logWrapper(message));
+          },
+          "error": (message) => {
+              logger.error(logWrapper(message));
+          },
+          "warn": (message) => {
+              logger.warn(logWrapper(message));
+          },
+          "verbose": (message) => {
+              logger.verbose(logWrapper(message));
+          },
+          "info": (message) => {
+              logger.info(logWrapper(message));
+          },
+          "debug": (message) => {
+              logger.debug(logWrapper(message));
+          },
+          "silly": (message) => {
+              logger.silly(logWrapper(message));
+          }
+      };
 
       logger.debug("Logger initialized!");
 
