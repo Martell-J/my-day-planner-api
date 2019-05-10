@@ -1,11 +1,11 @@
-x-swagger-router-controller: nosql_error
+x-swagger-router-controller: nosql_log
 get:
   # Must have the API key
   security:
     - GlobalSecurity: []
       Authentication: []
   description: Retrieves all error-logs made by the user requesting the resource
-  operationId: getAllErrorLogs
+  operationId: getAllLogs
   x-authentication-scopes:
     user:
       scopes: ["superadmin"]
