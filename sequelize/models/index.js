@@ -23,9 +23,13 @@ module.exports = {
       CONNECTION_SEQUELIZE_DATABASE,
       CONNECTION_SEQUELIZE_USERNAME,
       CONNECTION_SEQUELIZE_PASSWORD,
-      CONNECTION_SEQUELIZE_HOST,
-      CONNECTION_SEQUELIZE_PORT
+      CONNECTION_SEQUELIZE_OPTIONS_HOST,
+      CONNECTION_SEQUELIZE_OPTIONS_PORT
     } = process.env;
+    const connOps = {
+      "host": CONNECTION_SEQUELIZE_OPTIONS_HOST,
+      "port": CONNECTION_SEQUELIZE_OPTIONS_PORT
+    };
 
     // tie in the Operators object explicitly to each config object
     options.operatorsAliases = Sequelize.Op;
@@ -35,13 +39,13 @@ module.exports = {
     let db = {};
     let sequelize = null;
 
-    const getSeq = () => new Sequelize(CONNECTION_SEQUELIZE_DATABASE,
-      CONNECTION_SEQUELIZE_USERNAME,
-      CONNECTION_SEQUELIZE_PASSWORD, {
-        ...options,
-        "host": CONNECTION_SEQUELIZE_HOST,
-        "port": CONNECTION_SEQUELIZE_PORT
-      });
+    const getSeq = () =>
+      new Sequelize(CONNECTION_SEQUELIZE_DATABASE,
+        CONNECTION_SEQUELIZE_USERNAME,
+        CONNECTION_SEQUELIZE_PASSWORD, {
+          ...options,
+          ...connOps
+        });
 
 
     sequelize = getSeq();

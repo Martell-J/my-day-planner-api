@@ -58,7 +58,7 @@ PROCESS_KEYS.forEach((KEY) => {
   let obj = { ...config };
   while(arr.length && (obj = obj[arr.shift()]));
 
-  if (process.env[fullKey] === "") {
+  if (process.env[fullKey] === "" || !process.env[fullKey]) {
 
     process.env[fullKey] = obj;
 
