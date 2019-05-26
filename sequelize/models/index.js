@@ -35,23 +35,16 @@ module.exports = {
     let db = {};
     let sequelize = null;
 
-    // Use the environment variable if specified on the compiled config file
-    if (use_env_variable) {
+    const getSeq = () => new Sequelize(CONNECTION_SEQUELIZE_DATABASE,
+      CONNECTION_SEQUELIZE_USERNAME,
+      CONNECTION_SEQUELIZE_PASSWORD, {
+        ...options,
+        "host": CONNECTION_SEQUELIZE_HOST,
+        "port": CONNECTION_SEQUELIZE_PORT
+      });
 
-      // eslint-disable-next-line no-process-env
-      sequelize = new Sequelize(process.env[use_env_variable]);
 
-    } else {
-
-      sequelize = new Sequelize(CONNECTION_SEQUELIZE_DATABASE,
-        CONNECTION_SEQUELIZE_USERNAME,
-        CONNECTION_SEQUELIZE_PASSWORD, {
-          "host": CONNECTION_SEQUELIZE_HOST,
-          "port": CONNECTION_SEQUELIZE_PORT,
-          ...options
-        });
-
-    }
+    sequelize = getSeq();
 
     // Custom model definitions for our current setup.
     const getModelDefinitions = () => {
@@ -143,29 +136,35 @@ module.exports = {
         const postServerOps = [
           () => new Promise((reslv, rejct) => {
 
-            app.logger.debug("Creating a temporary dev user...");
-            // Sample data to generate a dummy-user
-            const DEFAULT_PASSWORD = "password123";
+            if (!app.env.includes("production")) {
+              app.logger.debug("Creating a temporary dev user...");
+              // Sample data to generate a dummy-user
+              const DEFAULT_PASSWORD = "password123";
 
-            return models.User.create({
-              "username": "johnathan",
-              "email": "sample@fakemail.ca",
-              "first_name": "John",
-              "last_name": "Doe",
-              "user_type": "superadmin",
-              "password": DEFAULT_PASSWORD,
-            }).then((u) => {
+              return models.User.create({
+                "username": "johnathan",
+                "email": "sample@fakemail.ca",
+                "first_name": "John",
+                "last_name": "Doe",
+                "user_type": "superadmin",
+                "password": DEFAULT_PASSWORD,
+              }).then((u) => {
 
-              if (u) {
+                if (u) {
 
-                app.logger.info("User created! Ignore the '?' generated in the debug log.");
-                return reslv(u);
-              } else {
+                  app.logger.info("User created! Ignore the '?' generated in the debug log.");
+                  return reslv(u);
+                } else {
 
-                return rejct(new ServerError("User initialization failed!"))
-              }
+                  return rejct(new ServerError("User initialization failed!"))
+                }
 
-            });
+              });
+            } else {
+
+              return reslv();
+
+            }
 
 
           }),
@@ -194,9 +193,7 @@ module.exports = {
 
               app.logger.info("Syncing DB. First run?");
 
-              let seq = new Sequelize("",
-                CONNECTION_SEQUELIZE_USERNAME,
-                CONNECTION_SEQUELIZE_PASSWORD, options)
+              let seq = getSeq();
 
               return seq.query("CREATE DATABASE " + CONNECTION_SEQUELIZE_DATABASE + ";")
                 .then(() => reslv(models));
