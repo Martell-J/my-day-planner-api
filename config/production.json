@@ -1,6 +1,5 @@
 {
   "env": "production",
-  "use-env-variable": "production",
   "debug": false,
   "connection": {
     "sequelize": {
