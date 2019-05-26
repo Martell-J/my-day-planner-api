@@ -22,7 +22,9 @@ module.exports = {
     const {
       CONNECTION_SEQUELIZE_DATABASE,
       CONNECTION_SEQUELIZE_USERNAME,
-      CONNECTION_SEQUELIZE_PASSWORD
+      CONNECTION_SEQUELIZE_PASSWORD,
+      CONNECTION_SEQUELIZE_HOST,
+      CONNECTION_SEQUELIZE_PORT
     } = process.env;
 
     // tie in the Operators object explicitly to each config object
@@ -43,7 +45,11 @@ module.exports = {
 
       sequelize = new Sequelize(CONNECTION_SEQUELIZE_DATABASE,
         CONNECTION_SEQUELIZE_USERNAME,
-        CONNECTION_SEQUELIZE_PASSWORD, options);
+        CONNECTION_SEQUELIZE_PASSWORD, {
+          "host": CONNECTION_SEQUELIZE_HOST,
+          "port": CONNECTION_SEQUELIZE_PORT,
+          ...options
+        });
 
     }
 
