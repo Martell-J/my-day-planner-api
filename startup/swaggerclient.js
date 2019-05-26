@@ -19,38 +19,50 @@ module.exports = {
 
     const { secret } = require("config");
 
-    const authUser = (username, password, callback) => {
+    let authRequest = () => null;
 
-      callback(username === secret.swagger_ui.username && password === secret.swagger_ui.password);
+    if(!app.env.includes("production")) {
 
-    };
+      const authUser = (username, password, callback) => {
 
-    // Create the swagger-ui with the given parameters for the API in the resolved config file,
-    // and authorize the user before allowing them to access the resource
-    const basic = auth.basic({ "realm": "swagger-ui", "skipUser": true }, (username, password, callback) =>
-      authUser(username, password, callback));
+        callback(username === secret.swagger_ui.username && password === secret.swagger_ui.password);
 
-    basic.on("error", (err, res) => {
+      };
 
-      logger.error(err);
+      // Create the swagger-ui with the given parameters for the API in the resolved config file,
+      // and authorize the user before allowing them to access the resource
+      const basic = auth.basic({ "realm": "swagger-ui", "skipUser": true }, (username, password, callback) =>
+        authUser(username, password, callback));
 
-      return res.json({
-        "message": "Internal error occurred",
-        "code": "INTERNAL_ERROR",
+      basic.on("error", (err, res) => {
+
+        logger.error(err);
+
+        return res.json({
+          "message": "Internal error occurred",
+          "code": "INTERNAL_ERROR",
+        });
+
       });
 
-    });
+      authRequest = () =>
+        auth.connect(basic);
 
-    const authRequest = () =>
-      auth.connect(basic);
+    }
+
+
 
     const cors = require("cors");
     const path = require("path");
 
     return new Promise((resolve) => {
 
-      // Authorize before accessing the basepath, when the path is '/ui' explicitly
-      app.use("/ui", authRequest());
+      if (!app.env.includes("production")) {
+
+        // Authorize before accessing the basepath, when the path is '/ui' explicitly
+        app.use("/ui", authRequest());
+
+      }
 
       const swaggerConfig = {
         "appRoot": path.join(__dirname, "../"),
@@ -59,7 +71,7 @@ module.exports = {
         "swaggerSecurityHandlers": {
           "GlobalSecurity": (req, res, callback) => {
 
-            if (secret.api_key === req.headers.api_key) {
+            if (process.env.SECRET_API_KEY === req.headers.api_key) {
 
               return callback();
 
@@ -198,7 +210,13 @@ module.exports = {
         logger.info("Swagger Client Created");
 
         // UI for the API is on /ui
-        app.use("/ui", swaggerUi.serve, swaggerUi.setup(app.resolvedSwaggerMU));
+        if(!app.env.includes("production")) {
+
+          logger.info("SWUI")
+          app.use("/ui", swaggerUi.serve, swaggerUi.setup(app.resolvedSwaggerMU));
+          logger.info("Swagger UI Client Created");
+        }
+
 
         app.use((swmwErr, req, res, next) => {
 
@@ -232,8 +250,6 @@ module.exports = {
           return next(swmwErr);
 
         });
-
-        logger.info("Swagger UI Client Created");
 
         resolve(app);
 

@@ -17,11 +17,16 @@ module.exports = {
     app.logger.debug("Initializing sequelize DB...");
 
     const basename = path.basename(module.filename);
-    const config = require("config");
-    const { connection } = config;
+    const { use_env_variable, connection } = require("config");
+    const { options } = connection.sequelize;
+    const {
+      CONNECTION_SEQUELIZE_DATABASE,
+      CONNECTION_SEQUELIZE_USERNAME,
+      CONNECTION_SEQUELIZE_PASSWORD
+    } = process.env;
 
     // tie in the Operators object explicitly to each config object
-    connection.sequelize.options.operatorsAliases = Sequelize.Op;
+    options.operatorsAliases = Sequelize.Op;
 
     // Define the directory for each model definition
     const modelDir = path.join(__dirname, "/definitions");
@@ -29,14 +34,16 @@ module.exports = {
     let sequelize = null;
 
     // Use the environment variable if specified on the compiled config file
-    if (config.use_env_variable) {
+    if (use_env_variable) {
 
       // eslint-disable-next-line no-process-env
-      sequelize = new Sequelize(process.env[config.use_env_variable]);
+      sequelize = new Sequelize(process.env[use_env_variable]);
 
     } else {
 
-      sequelize = new Sequelize(connection.sequelize.database, connection.sequelize.username, connection.sequelize.password, connection.sequelize.options);
+      sequelize = new Sequelize(CONNECTION_SEQUELIZE_DATABASE,
+        CONNECTION_SEQUELIZE_USERNAME,
+        CONNECTION_SEQUELIZE_PASSWORD, options);
 
     }
 
@@ -181,11 +188,11 @@ module.exports = {
 
               app.logger.info("Syncing DB. First run?");
 
-              const {options, password, username} = connection.sequelize;
+              let seq = new Sequelize("",
+                CONNECTION_SEQUELIZE_USERNAME,
+                CONNECTION_SEQUELIZE_PASSWORD, options)
 
-              let seq = new Sequelize("", username, password, options)
-
-              return seq.query("CREATE DATABASE " + config.connection.sequelize.database + ";")
+              return seq.query("CREATE DATABASE " + CONNECTION_SEQUELIZE_DATABASE + ";")
                 .then(() => reslv(models));
 
             } else {

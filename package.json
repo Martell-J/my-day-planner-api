@@ -16,6 +16,7 @@
     "start": "node app.js",
     "local": "node ./node_modules/cross-env/dist/bin/cross-env NODE_ENV=local-generic node app.js",
     "local-debug": "node ./node_modules/cross-env/dist/bin/cross-env NODE_ENV=local-debug node app.js",
+    "production": "node ./node_modules/cross-env/dist/bin/cross-env NODE_ENV=production node app.js",
     "test": "swagger project test",
     "lint": "eslint api handlers mock persist sequelize test app.js --quiet",
     "seq-init": "node ./scripts/init-cli-config.js",

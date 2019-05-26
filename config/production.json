@@ -1,0 +1,33 @@
+{
+  "env": "production",
+  "use-env-variable": "production",
+  "debug": false,
+  "connection": {
+    "sequelize": {
+      "username": "",
+      "password": "",
+      "database": "",
+      "options": {
+        "host": "",
+        "port": "",
+        "dialect": "",
+        "logging": false,
+        "dialectOptions": {
+          "multipleStatements": true,
+          "encrypt": true
+        }
+      }
+    },
+    "mongoose": {
+      "username": "",
+      "password": "",
+      "database": "",
+      "host": "",
+      "port": ""
+    }
+  },
+  "secret": {
+    "api_key": "",
+    "jwt_key": ""
+  }
+}

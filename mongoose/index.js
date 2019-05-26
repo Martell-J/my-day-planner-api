@@ -5,9 +5,6 @@ mongoose.Promise = global.Promise;
 const fs = require("fs");
 const path = require("path");
 
-const config = require("config");
-const mongo = config.connection.mongoose;
-
 const tieModelsIn = () =>
   new Promise((resolve) => {
 
@@ -37,17 +34,24 @@ const tieModelsIn = () =>
 module.exports = {
   "initializeMongooseDatabase": (app) => {
 
+    const {
+      CONNECTION_MONGOOSE_USERNAME,
+      CONNECTION_MONGOOSE_PASSWORD,
+      CONNECTION_MONGOOSE_DATABASE,
+      CONNECTION_MONGOOSE_HOST,
+      CONNECTION_MONGOOSE_PORT
+    } = process.env;
+
     return new Promise((resolve) => {
 
       app.logger.info("Using MongoDB database...");
 
       const dbConnectionString = "mongodb://"
-        + mongo.username + ":"
-        + mongo.password + "@"
-        + mongo.host + ":"
-        + mongo.port + "/"
-        + mongo.database;
-
+        + CONNECTION_MONGOOSE_USERNAME + ":"
+        + CONNECTION_MONGOOSE_PASSWORD + "@"
+        + CONNECTION_MONGOOSE_HOST + ":"
+        + CONNECTION_MONGOOSE_PORT + "/"
+        + CONNECTION_MONGOOSE_DATABASE;
       // Now promise-based.
       mongoose.connect(dbConnectionString, {
         "keepAlive": true,
@@ -73,7 +77,7 @@ module.exports = {
 
         app.mongoose = null;
         return resolve(app);
-        
+
       });
 
     });

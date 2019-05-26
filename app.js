@@ -2,7 +2,7 @@
 
 const app = require("express")();
 
-const { env, debug } = require("config");
+const config = require("config");
 
 const helmet = require("helmet");
 
@@ -30,9 +30,41 @@ const { initializeMongooseDatabase } = require("./mongoose/index.js");
 app.isReady = false;
 
 // Setup the Environment var for future reference in handlers
-app.env = env;
+app.env = config.env;
 
-app.debug = debug;
+app.debug = config.debug;
+
+const PROCESS_KEYS = [
+  "connection.sequelize.username",
+  "connection.sequelize.password",
+  "connection.sequelize.database",
+  "connection.sequelize.options.host",
+  "connection.sequelize.options.port",
+  "connection.mongoose.username",
+  "connection.mongoose.password",
+  "connection.mongoose.database",
+  "connection.mongoose.host",
+  "connection.mongoose.port",
+  "secret.api_key",
+  "secret.jwt_key"
+];
+
+// Map relevant keys to env variables (heroku?)
+PROCESS_KEYS.forEach((KEY) => {
+
+  const fullKey = KEY.toUpperCase().replace(/\./g, "_");
+
+  let arr = KEY.split(".");
+  let obj = { ...config };
+  while(arr.length && (obj = obj[arr.shift()]));
+
+  if (process.env[fullKey] === "") {
+
+    process.env[fullKey] = obj;
+
+  }
+
+});
 
 process.on("unhandledRejection", (err) => {
 
