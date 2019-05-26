@@ -10,7 +10,7 @@
       "options": {
         "host": "",
         "port": "",
-        "dialect": "",
+        "dialect": "mysql",
         "logging": false,
         "dialectOptions": {
           "multipleStatements": true,
