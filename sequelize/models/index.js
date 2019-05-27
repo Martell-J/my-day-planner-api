@@ -129,18 +129,20 @@ module.exports = {
 
         app.logger.info(models);
 
+        const isProductionEnv = app.env.includes("production");
+
         const modelArray = Object.values(models).sort((mod1, mod2) => mod1.options.syncOrder - mod2.options.syncOrder);
 
         // Create all tables in syncOrder
         const modelSyncPromises = modelArray.map((mod) => () => mod.sync());
 
         // Drop all tables if they already exist
-        const dropAllTablesPromises = modelArray.map((modr) => () => modr.drop()).reverse();
+        const dropAllTablesPromises = isProductionEnv ? [] : modelArray.map((modr) => () => modr.drop()).reverse();
 
         const postServerOps = [
           () => new Promise((reslv, rejct) => {
 
-            if (!app.env.includes("production")) {
+            if (!isProductionEnv) {
               app.logger.debug("Creating a temporary dev user...");
               // Sample data to generate a dummy-user
               const DEFAULT_PASSWORD = "password123";
