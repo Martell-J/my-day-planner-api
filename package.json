@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "axios": "0.18.0",
-    "bcrypt": ">=2.0.0",
+    "bcrypt": ">=5.0.0",
     "bluebird": "3.5.1",
     "config": "3.1.0",
     "continuation-local-storage": "3.2.1",
