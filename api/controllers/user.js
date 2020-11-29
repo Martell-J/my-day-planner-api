@@ -7,7 +7,7 @@ module.exports = {
 
   "getUserByAuthorization": (req, res) => {
 
-    models.User.find({
+    models.User.findOne({
       "where": {
         "user_id": req.authentication.user_id,
       },

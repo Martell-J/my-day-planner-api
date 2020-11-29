@@ -18,6 +18,7 @@
     "local-debug": "cross-env NODE_ENV=local-debug node app.js",
     "test": "swagger project test",
     "lint": "eslint api handlers mock persist sequelize test app.js --quiet",
+    "seq-init": "node ./scripts/init-cli-config.js",
     "sequelize": "node ./node_modules/.bin/sequelize"
   },
   "engines": {

@@ -18,7 +18,7 @@ After pulling a copy of the repository
 
 'yarn install' - Initialize lockfile, and garner dependencies
 
-'node ./scripts/init-cli-config.js' From Project Root - Runs the sequelize-init script via node
+'yarn seq-init' From Project Root - Runs the sequelize-init script via node
 
 'yarn local-generic' OR 'yarn local-debug' - Runs local database-configuration, in generic or debug mode
 

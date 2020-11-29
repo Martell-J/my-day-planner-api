@@ -3,6 +3,7 @@
 const fs = require("fs");
 const Promise = require("bluebird");
 const path = require("path");
+const { ServerError } = require("../../resources/errors.js");
 
 const namespace = require("continuation-local-storage").createNamespace("seq-api-session");
 const Sequelize = require("sequelize");
@@ -10,6 +11,8 @@ Sequelize.useCLS(namespace);
 
 module.exports = {
   "initializeSequelizeDatabase": (app) => {
+
+    app.logger.debug("Initializing sequelize DB...");
 
     const basename = path.basename(module.filename);
 
@@ -128,28 +131,49 @@ module.exports = {
 
         app.logger.info(models);
 
+        const isProductionEnv = ENV.includes("production");
+
         const modelArray = Object.values(models).sort((mod1, mod2) => mod1.options.syncOrder - mod2.options.syncOrder);
 
         // Create all tables in syncOrder
         const modelSyncPromises = modelArray.map((mod) => () => mod.sync());
 
         // Drop all tables if they already exist
-        const dropAllTablesPromises = modelArray.map((modr) => () => modr.drop()).reverse();
+        const dropAllTablesPromises = isProductionEnv ? [] : modelArray.map((modr) => () => modr.drop()).reverse();
 
         const postServerOps = [
-          () => new Promise((reslv) => {
+          () => new Promise((reslv, rejct) => {
 
-            // Sample data to generate a dummy-user
-            const DEFAULT_PASSWORD = "password123";
+            if (!isProductionEnv) {
+              app.logger.debug("Creating a temporary dev user...");
+              // Sample data to generate a dummy-user
+              const DEFAULT_PASSWORD = "password123";
 
-            return models.User.create({
-              "username": "johnathan",
-              "email": "sample@fakemail.ca",
-              "first_name": "John",
-              "last_name": "Doe",
-              "user_type": "superadmin",
-              "password": DEFAULT_PASSWORD,
-            }).then(reslv);
+              return models.User.create({
+                "username": "johnathan",
+                "email": "sample@fakemail.ca",
+                "first_name": "John",
+                "last_name": "Doe",
+                "user_type": "superadmin",
+                "password": DEFAULT_PASSWORD,
+              }).then((u) => {
+
+                if (u) {
+
+                  app.logger.info("User created! Ignore the '?' generated in the debug log.");
+                  return reslv(u);
+                } else {
+
+                  return rejct(new ServerError("User initialization failed!"))
+                }
+
+              });
+            } else {
+
+              return reslv();
+
+            }
+
 
           }),
         ];
@@ -177,11 +201,9 @@ module.exports = {
 
               app.logger.info("Syncing DB. First run?");
 
-              const {options, password, username} = connection.sequelize;
+              let seq = getSeq();
 
-              let seq = new Sequelize("", username, password, options)
-
-              return seq.query("CREATE DATABASE " + config.connection.sequelize.database + ";")
+              return seq.query("CREATE DATABASE " + CONNECTION_SEQUELIZE_DATABASE + ";")
                 .then(() => reslv(models));
 
             } else {
@@ -234,7 +256,7 @@ module.exports = {
           // Handle at end...
           app.models = modelsWithRelations;
 
-          app.logger.info("Sequelize Instance Initialized!");
+          app.logger.debug("Sequelize Instance Initialized!");
 
           return resolve(app);
 

@@ -5,8 +5,6 @@ mongoose.Promise = global.Promise;
 const fs = require("fs");
 const path = require("path");
 
-const config = require("config");
-
 const {
   MONGO_USERNAME,
   MONGO_PASSWORD,
@@ -44,6 +42,7 @@ const tieModelsIn = () =>
 module.exports = {
   "initializeMongooseDatabase": (app) => {
 
+
     return new Promise((resolve) => {
 
       app.logger.info("Using MongoDB database...");
@@ -80,7 +79,7 @@ module.exports = {
 
         app.mongoose = null;
         return resolve(app);
-        
+
       });
 
     });

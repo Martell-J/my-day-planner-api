@@ -19,35 +19,42 @@ module.exports = {
 
     const { ENV, SWUI_USERNAME, SWUI_PASSWORD, AUTH_MW_OVERRIDE_KEY, API_KEY } = process.env;
 
-    const authUser = (username, password, callback) => {
+    if(!ENV.includes("production")) {
 
-      callback(username === SWUI_USERNAME && password === SWUI_PASSWORD);
+      const authUser = (username, password, callback) => {
 
-    };
+        callback(username === SWUI_USERNAME && password === SWUI_PASSWORD);
 
-    // Create the swagger-ui with the given parameters for the API in the resolved config file,
-    // and authorize the user before allowing them to access the resource
-    const basic = auth.basic({ "realm": "swagger-ui", "skipUser": true }, (username, password, callback) =>
-      authUser(username, password, callback));
+      };
 
-    basic.on("error", (err, res) => {
+      // Create the swagger-ui with the given parameters for the API in the resolved config file,
+      // and authorize the user before allowing them to access the resource
+      const basic = auth.basic({ "realm": "swagger-ui", "skipUser": true }, (username, password, callback) =>
+        authUser(username, password, callback));
 
-      logger.error(err);
+      basic.on("error", (err, res) => {
 
-      return res.json({
-        "message": "Internal error occurred",
-        "code": "INTERNAL_ERROR",
+        logger.error(err);
+
+        return res.json({
+          "message": "Internal error occurred",
+          "code": "INTERNAL_ERROR",
+        });
+
       });
 
-    });
+      // Authorize before accessing the basepath, when the path is '/ui' explicitly
+      app.use("/ui", authConnect(basic));
+
+    }
+
 
     const cors = require("cors");
     const path = require("path");
 
     return new Promise((resolve) => {
 
-      // Authorize before accessing the basepath, when the path is '/ui' explicitly
-      app.use("/ui", authConnect(basic));
+      
 
       const swaggerConfig = {
         "appRoot": path.join(__dirname, "../"),
@@ -62,7 +69,11 @@ module.exports = {
 
             }
 
-            return callback(new InvalidUserAuthorityError());
+            const scopeError = new InvalidUserAuthorityError();
+
+            app.logger.error(scopeError)
+
+            return callback(scopeError);
 
           },
           "Authentication": (req, res, callback) => {
@@ -149,7 +160,7 @@ module.exports = {
       SwaggerExpress.create(swaggerConfig, (err, swaggerExpress) => {
 
         // When debugging, log the path, controller, and operation of each request.
-        if (app.debug) {
+        if (!ENV.includes('production')) {
 
           if (err) {
 
@@ -168,7 +179,7 @@ module.exports = {
             // If the path exists, log the details of it (Path, Controller, Operation, TimeStamp)
             if (pathSpec) {
 
-              app.logger.info("Request details:\n\t"
+              logger.info("Request details:\n\t"
                 + "Path: " + pathSpec.path + "\n\t"
                 + "Controller: " + pathSpec["x-swagger-router-controller"] + "\n\t"
                 + "Operation: " + pathSpec.definition[req.method.toLowerCase()].operationId + "\n\t"
@@ -188,10 +199,16 @@ module.exports = {
         // install middleware
         swaggerExpress.register(app);
 
-        app.logger.info("Swagger Client Created");
+        logger.info("Swagger Client Created");
 
         // UI for the API is on /ui
-        app.use("/ui", swaggerUi.serve, swaggerUi.setup(app.resolvedSwaggerMU));
+        if(!ENV.includes("production")) {
+
+          logger.info("SWUI")
+          app.use("/ui", swaggerUi.serve, swaggerUi.setup(app.resolvedSwaggerMU));
+          logger.info("Swagger UI Client Created");
+        }
+
 
         app.use((swmwErr, req, res, next) => {
 
@@ -203,7 +220,7 @@ module.exports = {
 
             }
 
-            app.logger.error(swmwErr);
+            logger.error(swmwErr);
 
             if (swmwErr.hasOwnProperty("errors")) {
 
@@ -225,8 +242,6 @@ module.exports = {
           return next(swmwErr);
 
         });
-
-        app.logger.info("Swagger UI Client Created");
 
         resolve(app);
 
