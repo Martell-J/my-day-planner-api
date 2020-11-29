@@ -3,6 +3,11 @@ logs/*
 *.log
 npm-debug.log*
 
+#Ignore all env files except for .env.example
+.env*
+!.env.example
+
+
 # Runtime data
 pids
 *.pid

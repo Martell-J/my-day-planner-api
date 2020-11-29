@@ -1,6 +1,6 @@
 "use strict";
 const { InvalidTokenError } = require("../../resources/errors.js");
-const cert = require("config").secret.jwt_key;
+const cert = process.env.JWT_KEY;
 const jwt = require("jsonwebtoken");
 const multipleToMillis = (value, type = "seconds") =>
   type === "minutes" ? (parseInt(value * 1000 * 60)) :

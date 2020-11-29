@@ -5,6 +5,8 @@ const { ServerError, InvalidUserAuthorityError, InvalidTokenError } = require(".
 const Promise = require("bluebird");
 
 const SUPER_USER = "superadmin";
+const auth = require("http-auth");
+const authConnect = require("http-auth-connect");
 
 module.exports = {
 
@@ -15,13 +17,11 @@ module.exports = {
     const SwaggerExpress = require("swagger-express-mw");
     const swaggerUi = require("swagger-ui-express");
 
-    const auth = require("http-auth");
-
-    const { secret } = require("config");
+    const { ENV, SWUI_USERNAME, SWUI_PASSWORD, AUTH_MW_OVERRIDE_KEY, API_KEY } = process.env;
 
     const authUser = (username, password, callback) => {
 
-      callback(username === secret.swagger_ui.username && password === secret.swagger_ui.password);
+      callback(username === SWUI_USERNAME && password === SWUI_PASSWORD);
 
     };
 
@@ -41,16 +41,13 @@ module.exports = {
 
     });
 
-    const authRequest = () =>
-      auth.connect(basic);
-
     const cors = require("cors");
     const path = require("path");
 
     return new Promise((resolve) => {
 
       // Authorize before accessing the basepath, when the path is '/ui' explicitly
-      app.use("/ui", authRequest());
+      app.use("/ui", authConnect(basic));
 
       const swaggerConfig = {
         "appRoot": path.join(__dirname, "../"),
@@ -59,7 +56,7 @@ module.exports = {
         "swaggerSecurityHandlers": {
           "GlobalSecurity": (req, res, callback) => {
 
-            if (secret.api_key === req.headers.api_key) {
+            if (req.headers.api_key === API_KEY) {
 
               return callback();
 
@@ -74,7 +71,7 @@ module.exports = {
             // Override all requests if the override key is passed (for testing only)
             // Uncomment during testing
             /*
-            if (req.headers.authentication === secret.swagger_ui.overrideAuthenticationKey) {
+            if (req.headers.authentication === AUTH_MW_OVERRIDE_KEY) {
 
               req.authentication = {
                 "user_id": 0,

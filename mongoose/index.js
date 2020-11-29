@@ -6,7 +6,14 @@ const fs = require("fs");
 const path = require("path");
 
 const config = require("config");
-const mongo = config.connection.mongoose;
+
+const {
+  MONGO_USERNAME,
+  MONGO_PASSWORD,
+  MONGO_DATABASE,
+  MONGO_HOST,
+  MONGO_PORT
+} = process.env;
 
 const tieModelsIn = () =>
   new Promise((resolve) => {
@@ -42,11 +49,11 @@ module.exports = {
       app.logger.info("Using MongoDB database...");
 
       const dbConnectionString = "mongodb://"
-        + mongo.username + ":"
-        + mongo.password + "@"
-        + mongo.host + ":"
-        + mongo.port + "/"
-        + mongo.database;
+        + MONGO_USERNAME + ":"
+        + MONGO_PASSWORD + "@"
+        + MONGO_HOST + ":"
+        + MONGO_PORT + "/"
+        + MONGO_DATABASE;
 
       // Now promise-based.
       mongoose.connect(dbConnectionString, {

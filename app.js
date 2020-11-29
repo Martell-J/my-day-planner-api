@@ -1,5 +1,7 @@
 "use strict";
 
+require('dotenv').config();
+
 const app = require("express")();
 
 const { env, debug } = require("config");
@@ -86,6 +88,8 @@ const initializePreServerOps = () => {
       return res.status(403).end("Forbidden");
 
     });
+
+    console.info("Pre-server ops complete.");
 
     resolve(app);
 
