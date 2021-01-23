@@ -8,6 +8,8 @@ const config = require("config");
 
 const helmet = require("helmet");
 
+const rateLimit = require("express-rate-limit");
+
 // Handler for initializing a logger and tying it to app
 const { initializeLogger } = require("./startup/logger");
 
@@ -107,6 +109,13 @@ const initializePreServerOps = () => {
     // More information can be found on the npm site.
     // See: https://www.npmjs.com/package/helmet
     app.use(helmet());
+
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 50 // limit each IP to 100 requests per windowMs
+    });
+
+    app.use(limiter);
 
     // Until the isReady flag (tied to app) is set to true, deny ALL request attempts
     app.use((req, res, next) => {
