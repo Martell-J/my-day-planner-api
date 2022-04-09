@@ -42,7 +42,7 @@
     "js-yaml": "3.14.0",
     "json-refs": "3.0.15",
     "jsonwebtoken": "8.5.1",
-    "moment": "2.29.1",
+    "moment": "2.29.2",
     "mongoose": "^5.10.18",
     "morgan": "1.10.0",
     "mysql2": "2.2.5",
